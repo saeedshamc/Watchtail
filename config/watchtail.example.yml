@@ -1,0 +1,64 @@
+# Watchtail configuration
+#
+# Copy this file to watchtail.yml in the project root and adjust it.
+# Secrets such as the admin password and session key are read from the
+# environment (.env) rather than this file: WATCHTAIL_ADMIN_PASSWORD and
+# WATCHTAIL_SECRET_KEY.
+
+server:
+  host: 127.0.0.1
+  port: 5555
+
+database:
+  # Swap for postgresql+psycopg://user:pass@host/dbname when needed.
+  url: sqlite:///data/watchtail.db
+
+sources:
+  - name: auth log
+    type: auth
+    # Absolute paths win; relative paths resolve against this file.
+    path: /var/log/auth.log
+    enabled: true
+
+  - name: nginx access
+    type: nginx
+    path: /var/log/nginx/access.log
+    enabled: true
+
+  - name: apache access
+    type: apache
+    path: /var/log/apache2/access.log
+    enabled: false
+
+detectors:
+  # N failed SSH logins from one IP within X seconds.
+  ssh_bruteforce:
+    enabled: true
+    max_failures: 5
+    window_seconds: 300
+
+  # N 403/404 responses served to one IP within X seconds.
+  http_error_spike:
+    enabled: true
+    max_errors: 20
+    window_seconds: 60
+    status_codes: [403, 404]
+
+  # N requests of any kind from one IP within X seconds.
+  request_burst:
+    enabled: true
+    max_requests: 120
+    window_seconds: 60
+
+  # How long a flagged IP stays flagged after the last alert.
+  flag_ttl_seconds: 900
+
+notifier:
+  # POSTs a JSON summary for every alert. Leave url empty to disable.
+  webhook:
+    url: ""
+    timeout_seconds: 5
+
+retention:
+  # Trim events and alerts older than this many days on startup.
+  max_age_days: 14

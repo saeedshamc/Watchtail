@@ -1,0 +1,9 @@
+# Runtime dependencies
+Flask==3.1.2
+Flask-SocketIO==5.5.1
+SQLAlchemy==2.0.43
+PyYAML==6.0.3
+requests==2.32.5
+
+# Development and test dependencies
+pytest==8.4.2
