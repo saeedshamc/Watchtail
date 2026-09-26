@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · Watchtail{% endblock %}
+{% block head %}
+  <script src="{{ url_for('static', filename='vendor/chart.umd.min.js') }}"
+          onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js'"></script>
+{% endblock %}
+{% block body_attrs %}data-chart-labels="{{ chart_labels | join(',') }}" data-chart-traffic="{{ chart_traffic | join(',') }}" data-chart-errors="{{ chart_errors | join(',') }}"{% endblock %}
+{% block content %}
+<section class="card full">
+  <div class="stats">
+    <div class="stat"><div class="num" id="stat-events">{{ stats.event_count }}</div><div class="label">events (24h)</div></div>
+    <div class="stat"><div class="num" id="stat-alerts">{{ stats.alert_count }}</div><div class="label">alerts (24h)</div></div>
+    <div class="stat"><div class="num" id="stat-flagged">{{ stats.flagged_count }}</div><div class="label">flagged IPs</div></div>
+    <div class="stat"><div class="num" id="stat-sources">{{ stats.active_sources }}/{{ stats.source_count }}</div><div class="label">sources tailing</div></div>
+  </div>
+</section>
+
+<section class="card full">
+  <h2>Traffic &amp; 4xx errors (last hour, UTC)</h2>
+  <canvas id="traffic-chart" height="90"></canvas>
+</section>
+
+<section class="card full">
+  <h2>Latest events</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>time (UTC)</th><th>kind</th><th>ip</th><th>request</th><th class="num">status</th>
+      </tr>
+    </thead>
+    <tbody id="event-rows">
+      {% for event in recent_events %}
+      <tr>
+        <td>{{ event.ts.strftime('%H:%M:%S') }}</td>
+        <td><span class="badge {{ 'high' if event.kind == 'ssh_auth_fail' else 'ok' }}">{{ event.kind }}</span></td>
+        <td><code>{{ event.ip or '-' }}</code></td>
+        <td class="small">{{ event.method ~ ' ' ~ event.path if event.method else event.meta.get('user', '') }}</td>
+        <td class="num">{{ event.status or '' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="muted">Waiting for log lines…</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
