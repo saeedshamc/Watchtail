@@ -1,12 +1,14 @@
 """Parser registry: source type name -> parser instance."""
 
 from .apache import ApacheAccessParser
+from .auth import AuthLogParser
 from .base import ParsedLine, Parser
 from .nginx import NginxAccessParser
 
 _REGISTRY = {
     "nginx": NginxAccessParser,
     "apache": ApacheAccessParser,
+    "auth": AuthLogParser,
 }
 
 
