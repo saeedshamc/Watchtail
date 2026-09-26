@@ -56,6 +56,14 @@ detectors:
     min_failures: 1
     window_seconds: 600
 
+  # N distinct 4xx paths probed by one IP within X seconds; catches
+  # slow scanners that stay under the burst thresholds.
+  path_scan:
+    enabled: true
+    max_paths: 30
+    window_seconds: 60
+    status_codes: [404, 403]
+
   # How long a flagged IP stays flagged after the last alert.
   flag_ttl_seconds: 900
 
