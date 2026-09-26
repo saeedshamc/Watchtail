@@ -30,6 +30,11 @@ config, run one command, open a browser.
 - Python 3.11 or newer
 - Read access to the log files you want to monitor
 
+> **Prefer an installer?** Ready-made packages — a Windows portable
+> zip and installer, Linux AppImage and deb — are described in
+> [docs/INSTALL.md](docs/INSTALL.md); no Python needed on the target
+> machine.
+
 ## Quick start
 
 ```bash
