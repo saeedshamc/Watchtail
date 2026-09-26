@@ -2,6 +2,7 @@
 
 from flask import Blueprint, flash, jsonify, redirect, request, url_for
 
+from ..auth import login_required
 from ..database import session_scope
 from ..models import IpStatus
 
@@ -11,6 +12,7 @@ VALID_ACTIONS = {"reviewed", "dismissed", "flagged"}
 
 
 @bp.get("/api/flagged")
+@login_required
 def flagged_api():
     with session_scope() as session:
         rows = (
@@ -37,6 +39,7 @@ def flagged_api():
 
 
 @bp.post("/ips/<path:ip>/status")
+@login_required
 def update_status(ip):
     action = (request.form.get("action") or "").strip().lower()
     if action not in VALID_ACTIONS:

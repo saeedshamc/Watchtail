@@ -4,6 +4,7 @@ import os
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
+from ..auth import login_required
 from ..database import session_scope
 from ..models import LogSource
 from ..parsers import known_types
@@ -12,6 +13,7 @@ bp = Blueprint("sources", __name__)
 
 
 @bp.get("/sources")
+@login_required
 def manage():
     with session_scope() as session:
         sources = session.query(LogSource).order_by(LogSource.id).all()
@@ -21,6 +23,7 @@ def manage():
 
 
 @bp.post("/sources/add")
+@login_required
 def add():
     name = (request.form.get("name") or "").strip()
     source_type = (request.form.get("type") or "").strip().lower()
@@ -54,6 +57,7 @@ def add():
 
 
 @bp.post("/sources/<int:source_id>/toggle")
+@login_required
 def toggle(source_id):
     with session_scope() as session:
         source = session.get(LogSource, source_id)
@@ -66,6 +70,7 @@ def toggle(source_id):
 
 
 @bp.post("/sources/<int:source_id>/delete")
+@login_required
 def delete(source_id):
     with session_scope() as session:
         source = session.get(LogSource, source_id)

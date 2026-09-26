@@ -5,6 +5,7 @@ import datetime as dt
 from flask import Blueprint, render_template
 from sqlalchemy import func, select
 
+from ..auth import login_required
 from ..database import session_scope
 from ..models import Alert, Event, IpStatus, LogSource, utcnow
 
@@ -40,6 +41,7 @@ def _chart_series(session):
 
 
 @bp.get("/")
+@login_required
 def dashboard():
     now = utcnow()
     day_ago = now - dt.timedelta(hours=24)

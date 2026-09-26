@@ -16,7 +16,11 @@ def memory_app():
 
 @pytest.fixture
 def client(memory_app):
-    return memory_app.test_client()
+    client = memory_app.test_client()
+    client.post(
+        "/login", data={"username": "admin", "password": "test-password"}
+    )
+    return client
 
 
 def test_sources_page_lists_rows(client):
