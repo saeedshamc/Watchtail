@@ -50,6 +50,12 @@ detectors:
     max_requests: 120
     window_seconds: 60
 
+  # Successful SSH login from an IP that had failures shortly before.
+  ssh_compromise:
+    enabled: true
+    min_failures: 1
+    window_seconds: 600
+
   # How long a flagged IP stays flagged after the last alert.
   flag_ttl_seconds: 900
 

@@ -7,6 +7,7 @@ from .base import Detector, DetectorAlert
 from .burst import RequestBurstDetector
 from .http_errors import HttpErrorSpikeDetector
 from .ssh_bruteforce import SshBruteforceDetector
+from .ssh_compromise import SshCompromiseDetector
 
 logger = logging.getLogger("watchtail")
 
@@ -14,6 +15,7 @@ DETECTOR_CLASSES = {
     SshBruteforceDetector.name: SshBruteforceDetector,
     HttpErrorSpikeDetector.name: HttpErrorSpikeDetector,
     RequestBurstDetector.name: RequestBurstDetector,
+    SshCompromiseDetector.name: SshCompromiseDetector,
 }
 
 
