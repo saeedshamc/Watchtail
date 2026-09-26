@@ -2,12 +2,13 @@
 
 import datetime as dt
 
-from flask import Blueprint, render_template
+from flask import Blueprint, current_app, render_template
 from sqlalchemy import func, select
 
 from ..auth import login_required
 from ..database import session_scope
 from ..models import Alert, Event, IpStatus, LogSource, utcnow
+from ..queries import active_flagged_ips, fresh_flagged_count
 
 bp = Blueprint("dashboard", __name__)
 
@@ -43,6 +44,7 @@ def _chart_series(session):
 @bp.get("/")
 @login_required
 def dashboard():
+    settings = current_app.config["WATCHTAIL_SETTINGS"]
     now = utcnow()
     day_ago = now - dt.timedelta(hours=24)
 
@@ -53,11 +55,7 @@ def dashboard():
         alert_count = (
             session.query(func.count(Alert.id)).filter(Alert.ts >= day_ago).scalar()
         )
-        flagged_count = (
-            session.query(func.count(IpStatus.ip))
-            .filter(IpStatus.status == "flagged")
-            .scalar()
-        )
+        flagged_count = fresh_flagged_count(session, settings)
         source_count = session.query(func.count(LogSource.id)).scalar()
         active_sources = (
             session.query(func.count(LogSource.id))
@@ -67,13 +65,7 @@ def dashboard():
         recent_events = (
             session.query(Event).order_by(Event.ts.desc(), Event.id.desc()).limit(30).all()
         )
-        flagged_ips = (
-            session.query(IpStatus)
-            .filter(IpStatus.status != "dismissed")
-            .order_by(IpStatus.last_alert_at.desc())
-            .limit(20)
-            .all()
-        )
+        flagged_ips = active_flagged_ips(session, settings, limit=20)
         labels, traffic, errors = _chart_series(session)
 
     stats = {

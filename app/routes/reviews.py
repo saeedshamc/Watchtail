@@ -5,6 +5,7 @@ from flask import Blueprint, flash, jsonify, redirect, request, url_for
 from ..auth import login_required
 from ..database import session_scope
 from ..models import IpStatus
+from ..queries import active_flagged_ips
 
 bp = Blueprint("reviews", __name__)
 
@@ -14,14 +15,9 @@ VALID_ACTIONS = {"reviewed", "dismissed", "flagged"}
 @bp.get("/api/flagged")
 @login_required
 def flagged_api():
+    settings = _settings()
     with session_scope() as session:
-        rows = (
-            session.query(IpStatus)
-            .filter(IpStatus.status != "dismissed")
-            .order_by(IpStatus.last_alert_at.desc())
-            .limit(100)
-            .all()
-        )
+        rows = active_flagged_ips(session, settings)
         return jsonify(
             [
                 {
@@ -36,6 +32,12 @@ def flagged_api():
                 for row in rows
             ]
         )
+
+
+def _settings():
+    from flask import current_app
+
+    return current_app.config["WATCHTAIL_SETTINGS"]
 
 
 @bp.post("/ips/<path:ip>/status")
