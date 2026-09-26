@@ -24,12 +24,17 @@ def default_database_url() -> str:
     return "sqlite:///data/watchtail.db"
 
 
-def create_app(config_path=None):
+def create_app(config_path=None, database_url=None):
     """Build the Flask app.
 
     ``config_path`` points at a watchtail.yml file; when omitted the
     default locations (./watchtail.yml then ./config/watchtail.example.yml)
     are used so the app still boots for tests and first runs.
+
+    The database URL comes from the ``database_url`` argument, the
+    WATCHTAIL_DATABASE_URL environment variable, or the config file, in
+    that order. Tests pass a URL explicitly so they never touch the
+    configured database.
     """
     app = Flask(__name__)
 
@@ -39,8 +44,11 @@ def create_app(config_path=None):
         "WATCHTAIL_SECRET_KEY", ""
     ) or secrets.token_hex(32)
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=12)
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-        "WATCHTAIL_DATABASE_URL", settings.database_url or default_database_url()
+    app.config["SQLALCHEMY_DATABASE_URI"] = (
+        database_url
+        or os.environ.get("WATCHTAIL_DATABASE_URL")
+        or settings.database_url
+        or default_database_url()
     )
 
     configure_engine(app.config["SQLALCHEMY_DATABASE_URI"])
