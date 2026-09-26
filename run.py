@@ -74,6 +74,9 @@ def main():
         sources = session.query(LogSource).all()
     manager.sync(sources)
 
+    # Bind the module-level SocketIO instance to this app; without
+    # this the server object does not exist and run() fails.
+    socketio.init_app(application)
     start_broadcaster(application)
 
     try:
