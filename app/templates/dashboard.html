@@ -3,6 +3,8 @@
 {% block head %}
   <script src="{{ url_for('static', filename='vendor/chart.umd.min.js') }}"
           onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js'"></script>
+  <script src="{{ url_for('static', filename='vendor/socket.io.min.js') }}"
+          onerror="this.onerror=null;this.src='https://cdn.socket.io/4.8.1/socket.io.min.js'"></script>
 {% endblock %}
 {% block body_attrs %}data-chart-labels="{{ chart_labels | join(',') }}" data-chart-traffic="{{ chart_traffic | join(',') }}" data-chart-errors="{{ chart_errors | join(',') }}"{% endblock %}
 {% block content %}
@@ -22,6 +24,7 @@
 
 <section class="card full">
   <h2>Latest events</h2>
+  <div class="muted small" id="socket-state">connecting…</div>
   <table>
     <thead>
       <tr>
