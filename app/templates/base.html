@@ -14,6 +14,11 @@
     {% block header_extra %}{% endblock %}
   </header>
   <main>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="flash full">{{ messages[0] }}</div>
+      {% endif %}
+    {% endwith %}
     {% block content %}{% endblock %}
   </main>
   {% block scripts %}{% endblock %}

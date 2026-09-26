@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Sources · Watchtail{% endblock %}
+{% block content %}
+<section class="card full">
+  <h2>Log sources</h2>
+  <p class="muted small">Sources declared in watchtail.yml are re-added on startup; rows
+  deleted here will reappear unless removed from the file too.</p>
+  <table>
+    <thead>
+      <tr><th>name</th><th>type</th><th>path</th><th>state</th><th class="num">read offset</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for source in sources %}
+      <tr>
+        <td>{{ source.name }}</td>
+        <td><span class="badge ok">{{ source.type }}</span></td>
+        <td><code>{{ source.path }}</code></td>
+        <td>
+          {% if source.enabled %}
+          <span class="badge ok">tailing</span>
+          {% else %}
+          <span class="badge dismissed">paused</span>
+          {% endif %}
+        </td>
+        <td class="num">{{ source.last_position }}</td>
+        <td class="source-actions">
+          <form method="post" action="{{ url_for('sources.toggle', source_id=source.id) }}">
+            <button type="submit">{{ 'pause' if source.enabled else 'resume' }}</button>
+          </form>
+          <form method="post" action="{{ url_for('sources.delete', source_id=source.id) }}">
+            <button type="submit">remove</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" class="muted">No sources configured yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2 style="margin-top:1.4rem">Add a source</h2>
+  <form class="add-source" method="post" action="{{ url_for('sources.add') }}">
+    <input name="name" placeholder="Name (e.g. nginx access)" required>
+    <select name="type" required>
+      {% for type_name in known_types %}
+      <option value="{{ type_name }}">{{ type_name }}</option>
+      {% endfor %}
+    </select>
+    <input name="path" placeholder="/var/log/nginx/access.log" required>
+    <button type="submit">Add source</button>
+  </form>
+</section>
+{% endblock %}
