@@ -162,7 +162,9 @@ class TailManager:
         """Start/stop workers so they match the given source rows.
 
         Sources with an unknown type are skipped (nothing to parse them
-        with) and disabled rows are stopped.
+        with) and disabled rows are stopped. Workers receive their
+        source row in every callback so the pipeline can attribute
+        records without a second lookup.
         """
         with self._lock:
             wanted = {}
@@ -182,10 +184,13 @@ class TailManager:
             for source_id, source in wanted.items():
                 worker = self._workers.get(source_id)
                 if worker is None or not worker.is_alive():
+                    def callback(record, raw, _source=source):
+                        self.on_record(record, raw, _source)
+
                     self._workers[source_id] = TailWorker(
                         source,
                         self.parser_factory(source.type),
-                        self.on_record,
+                        callback,
                         poll_interval=self.poll_interval,
                         persist_position=self.persist_position,
                     )

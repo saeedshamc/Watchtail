@@ -1,7 +1,5 @@
 """Detection of repeated 4xx responses from a single IP."""
 
-import time
-
 from .base import Detector, DetectorAlert
 
 
@@ -10,6 +8,7 @@ class HttpErrorSpikeDetector(Detector):
 
     Targets 403/404 by default: bursts of them usually mean content
     scanning or auth probing rather than a user who mistyped once.
+    Windows run on event time (record timestamps).
     """
 
     name = "http_error_spike"
@@ -25,7 +24,6 @@ class HttpErrorSpikeDetector(Detector):
         self._cooldown_until: dict[str, float] = {}
 
     def feed(self, record) -> list:
-        now = time.time()
         ip = record.ip
         if not ip or record.status not in self.status_codes:
             return []
@@ -33,13 +31,13 @@ class HttpErrorSpikeDetector(Detector):
         ts = record.ts.timestamp()
         stamps = self._hits.setdefault(ip, [])
         stamps.append((ts, record.status))
-        stamps = [pair for pair in stamps if now - pair[0] <= self.window_seconds]
+        stamps = [pair for pair in stamps if ts - pair[0] <= self.window_seconds]
         self._hits[ip] = stamps
 
-        if len(stamps) >= self.max_errors and now >= self._cooldown_until.get(ip, 0):
+        if len(stamps) >= self.max_errors and ts >= self._cooldown_until.get(ip, 0):
             # Cooldown matches the SSH rule so a sustained scan does
             # not alert on every subsequent request.
-            self._cooldown_until[ip] = now + self.window_seconds
+            self._cooldown_until[ip] = ts + self.window_seconds
             counts: dict[int, int] = {}
             for _, status in stamps:
                 counts[status] = counts.get(status, 0) + 1

@@ -6,10 +6,9 @@ from .base import Detector, DetectorAlert
 class SshBruteforceDetector(Detector):
     """Fires when one IP logs N failed attempts within a sliding window.
 
-    Failure timestamps are kept per IP; a simple linear scan over the
-    window's timestamps is deliberately used instead of a deque with a
-    head pointer: windows are tiny (a handful of failures) and this
-    stays obvious.
+    All windowing and cooldowns run on event time (the timestamps of
+    the records themselves), so behaviour is identical for live lines
+    and for a backlog read after a restart.
     """
 
     name = "ssh_bruteforce"
@@ -21,20 +20,19 @@ class SshBruteforceDetector(Detector):
         self.window_seconds = int(options.get("window_seconds", 300))
         self._failures: dict[str, list[float]] = {}
         self._cooldown_until: dict[str, float] = {}
+        self._latest = 0.0
 
     def feed(self, record) -> list:
-        import time
-
-        now = time.time()
-        self._prune(now)
-        ts = record.ts.timestamp()
         ip = record.ip
         if not ip:
             return []
+        now = record.ts.timestamp()
+        self._latest = max(self._latest, now)
+        self._prune()
         stamps = self._failures.setdefault(ip, [])
-        stamps.append(ts)
+        stamps.append(now)
 
-        window = [t for t in stamps if ts - t <= self.window_seconds]
+        window = [t for t in stamps if now - t <= self.window_seconds]
         self._failures[ip] = window
 
         if len(window) >= self.max_failures and now >= self._cooldown_until.get(ip, 0):
@@ -60,8 +58,8 @@ class SshBruteforceDetector(Detector):
             ]
         return []
 
-    def _prune(self, now):
-        horizon = now - max(self.window_seconds * 4, 3600)
+    def _prune(self):
+        horizon = self._latest - max(self.window_seconds * 4, 3600)
         for ip in list(self._failures):
             self._failures[ip] = [t for t in self._failures[ip] if t >= horizon]
             if not self._failures[ip]:
