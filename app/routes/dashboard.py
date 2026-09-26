@@ -65,6 +65,13 @@ def dashboard():
         recent_events = (
             session.query(Event).order_by(Event.ts.desc(), Event.id.desc()).limit(30).all()
         )
+        flagged_ips = (
+            session.query(IpStatus)
+            .filter(IpStatus.status != "dismissed")
+            .order_by(IpStatus.last_alert_at.desc())
+            .limit(20)
+            .all()
+        )
         labels, traffic, errors = _chart_series(session)
 
     stats = {
@@ -78,6 +85,7 @@ def dashboard():
         "dashboard.html",
         stats=stats,
         recent_events=recent_events,
+        flagged_ips=flagged_ips,
         chart_labels=labels,
         chart_traffic=traffic,
         chart_errors=errors,
