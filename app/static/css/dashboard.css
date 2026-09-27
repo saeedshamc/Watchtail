@@ -151,6 +151,25 @@ td code { font-size: 0.8rem; color: var(--accent); }
 
 .ip-row form { display: flex; gap: 0.3rem; }
 
+.inline-actions { display: inline-block; margin-right: 0.5rem; }
+
+.inline-actions button {
+  background: none;
+  border: 1px solid var(--panel-edge);
+  color: var(--muted);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+}
+
+.inline-actions button:hover { color: var(--text); border-color: var(--muted); }
+
+h2 code { color: var(--accent); }
+
+h2 a { color: inherit; text-decoration: none; }
+h2 a:hover { color: var(--accent); }
+
 .ip-row button {
   background: none;
   border: 1px solid var(--panel-edge);

@@ -27,7 +27,7 @@
   <div id="flagged-list">
     {% for ip in flagged_ips %}
     <div class="ip-row" data-ip="{{ ip.ip }}">
-      <span class="ip"><code>{{ ip.ip }}</code></span>
+      <span class="ip"><a href="{{ url_for('ip_detail.detail', ip=ip.ip) }}"><code>{{ ip.ip }}</code></a></span>
       <span class="badge {{ ip.status }}">{{ ip.status }}</span>
       <span class="reason">{{ ip.reason or '' }} · {{ ip.alert_count }} alerts</span>
       <form method="post" action="{{ url_for('reviews.update_status', ip=ip.ip) }}">

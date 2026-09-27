@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}{{ ip }} · Watchtail{% endblock %}
+{% block content %}
+<section class="card full">
+  <h2><code>{{ ip }}</code>
+    <span class="badge {{ ip_row.status }}">{{ ip_row.status }}</span>
+  </h2>
+  <p class="muted small">
+    {{ ip_row.alert_count }} alert(s) · first seen {{ ip_row.first_seen_at.strftime('%Y-%m-%d %H:%M UTC') if ip_row.first_seen_at else '?' }}
+    · last alert {{ ip_row.last_alert_at.strftime('%Y-%m-%d %H:%M UTC') if ip_row.last_alert_at else 'never' }}
+  </p>
+  <form method="post" action="{{ url_for('reviews.update_status', ip=ip) }}" class="inline-actions">
+    <input type="hidden" name="action" value="reviewed">
+    <button type="submit">Mark reviewed</button>
+  </form>
+  <form method="post" action="{{ url_for('reviews.update_status', ip=ip) }}" class="inline-actions">
+    <input type="hidden" name="action" value="dismissed">
+    <button type="submit">Dismiss (never flag again)</button>
+  </form>
+  {% if ip_row.status == 'dismissed' %}
+  <form method="post" action="{{ url_for('reviews.update_status', ip=ip) }}" class="inline-actions">
+    <input type="hidden" name="action" value="reviewed">
+    <button type="submit">Re-enable flagging</button>
+  </form>
+  {% endif %}
+</section>
+
+<section class="card full">
+  <h2>Alerts</h2>
+  <table>
+    <thead><tr><th>time (UTC)</th><th>detector</th><th>severity</th><th>message</th></tr></thead>
+    <tbody>
+      {% for alert in alerts %}
+      <tr>
+        <td>{{ alert.ts.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        <td><span class="badge {{ alert.severity }}">{{ alert.detector }}</span></td>
+        <td>{{ alert.severity }}</td>
+        <td class="small">{{ alert.message }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="muted">No alerts recorded.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="card full">
+  <h2>Recent events (last 24h)</h2>
+  <table>
+    <thead><tr><th>time (UTC)</th><th>kind</th><th>request</th><th class="num">status</th></tr></thead>
+    <tbody>
+      {% for event in events %}
+      <tr>
+        <td>{{ event.ts.strftime('%H:%M:%S') }}</td>
+        <td>{{ event.kind }}</td>
+        <td class="small">{{ event.method ~ ' ' ~ event.path if event.method else event.meta.get('user', '') }}</td>
+        <td class="num">{{ event.status or '' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="muted">No events in the last 24 hours.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
