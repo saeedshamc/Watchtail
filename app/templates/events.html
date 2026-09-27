@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Events · Watchtail{% endblock %}
+{% block content %}
+<section class="card full">
+  <h2>Events
+    <span class="export-links">
+      <a href="{{ csv_url }}">download CSV</a>
+      <a href="{{ api_url }}">JSON API</a>
+    </span>
+  </h2>
+
+  <form method="get" class="filter-bar">
+    <select name="kind">
+      <option value="">all kinds</option>
+      {% for kind in kinds %}
+      <option value="{{ kind }}" {% if kind == request.args.get('kind', '') %}selected{% endif %}>{{ kind }}</option>
+      {% endfor %}
+    </select>
+    <input type="text" name="ip" placeholder="ip address" value="{{ request.args.get('ip', '') }}" size="16">
+    <select name="status">
+      <option value="">any status</option>
+      {% for label in ['2xx', '3xx', '4xx', '5xx'] %}
+      <option value="{{ label }}" {% if label == request.args.get('status', '') %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <input type="text" name="q" placeholder="search path / raw / user agent" value="{{ request.args.get('q', '') }}" size="28">
+    <select name="hours">
+      {% for hours in [1, 6, 24, 72, 168, 744] %}
+      <option value="{{ hours }}" {% if hours|string == request.args.get('hours', '24') %}selected{% endif %}>{{ hours }}h</option>
+      {% endfor %}
+    </select>
+    <input type="hidden" name="limit" value="{{ limit }}">
+    <button type="submit">Filter</button>
+    <a href="{{ url_for('events.browse') }}" class="muted small">reset</a>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>time (UTC)</th><th>kind</th><th>ip</th><th>request</th><th class="num">status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for event in events %}
+      <tr>
+        <td>{{ event.ts.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        <td><span class="badge {{ 'high' if event.kind == 'ssh_auth_fail' else 'ok' }}">{{ event.kind }}</span></td>
+        <td><code>{% if event.ip %}<a href="{{ url_for('events.browse', ip=event.ip) }}">{{ event.ip }}</a>{% else %}-{% endif %}</code></td>
+        <td class="small">{{ event.method ~ ' ' ~ event.path if event.method else event.meta.get('user', '') }}</td>
+        <td class="num">{{ event.status or '' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="muted">No events match the current filters.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p class="muted small">
+    {% if prev_url %}<a href="{{ prev_url }}">&larr; newer</a>{% endif %}
+    page {{ page }}
+    {% if next_url %}<a href="{{ next_url }}">older &rarr;</a>{% endif %}
+  </p>
+</section>
+{% endblock %}

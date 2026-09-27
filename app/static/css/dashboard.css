@@ -265,3 +265,37 @@ h2 a:hover { color: var(--accent); }
 }
 
 .source-actions form { display: inline; }
+
+/* --- Events browser --- */
+.export-links {
+  float: right;
+  font-size: 0.78rem;
+  font-weight: 400;
+}
+.export-links a { margin-left: 0.8rem; }
+
+.filter-bar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0.7rem 0 1rem;
+}
+.filter-bar input,
+.filter-bar select {
+  padding: 0.4rem 0.55rem;
+  background: var(--bg);
+  border: 1px solid var(--panel-edge);
+  border-radius: 7px;
+  color: var(--text);
+  font-size: 0.84rem;
+}
+.filter-bar button {
+  padding: 0.4rem 0.9rem;
+  background: var(--accent);
+  border: none;
+  border-radius: 7px;
+  color: #0b1016;
+  font-weight: 600;
+  cursor: pointer;
+}
+.filter-bar a { align-self: center; }
