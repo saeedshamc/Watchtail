@@ -17,6 +17,7 @@ import queue
 import threading
 from datetime import timedelta
 
+from flask import request, session
 from flask_socketio import SocketIO
 from sqlalchemy import func, select
 
@@ -27,6 +28,19 @@ logger = logging.getLogger("watchtail")
 STATS_INTERVAL_SECONDS = 10
 
 socketio = SocketIO(async_mode="threading", cors_allowed_origins=[])
+
+
+@socketio.on("connect")
+def _authenticate_socket():
+    """Reject unauthenticated socket connections.
+
+    The stream carries live event and alert data, so anonymous
+    visitors must not receive it even when the HTTP pages are gated.
+    Returns False to refuse the handshake.
+    """
+    return bool(session.get("user"))
+
+
 _queue: "queue.Queue[dict]" = queue.Queue(maxsize=500)
 _broadcaster_started = False
 _broadcaster_stop = threading.Event()
