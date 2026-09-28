@@ -88,6 +88,12 @@ def create_app(config_path=None, database_url=None):
     register_blueprints(app)
     _register_security_headers(app)
 
+    from . import i18n
+
+    @app.context_processor
+    def _inject_i18n():
+        return {"tr": i18n.tr, "current_lang": i18n.current_language}
+
     return app
 
 

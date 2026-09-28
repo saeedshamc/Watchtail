@@ -10,10 +10,10 @@
 {% block content %}
 <section class="card full">
   <div class="stats">
-    <div class="stat"><div class="num" id="stat-events">{{ stats.event_count }}</div><div class="label">events (24h)</div></div>
-    <div class="stat"><div class="num" id="stat-alerts">{{ stats.alert_count }}</div><div class="label">alerts (24h)</div></div>
-    <div class="stat"><div class="num" id="stat-flagged">{{ stats.flagged_count }}</div><div class="label">flagged IPs</div></div>
-    <div class="stat"><div class="num" id="stat-sources">{{ stats.active_sources }}/{{ stats.source_count }}</div><div class="label">sources tailing</div></div>
+    <div class="stat"><div class="num" id="stat-events">{{ stats.event_count }}</div><div class="label">{{ tr('stats.events') }}</div></div>
+    <div class="stat"><div class="num" id="stat-alerts">{{ stats.alert_count }}</div><div class="label">{{ tr('stats.alerts') }}</div></div>
+    <div class="stat"><div class="num" id="stat-flagged">{{ stats.flagged_count }}</div><div class="label">{{ tr('stats.flagged') }}</div></div>
+    <div class="stat"><div class="num" id="stat-sources">{{ stats.active_sources }}/{{ stats.source_count }}</div><div class="label">{{ tr('stats.sources') }}</div></div>
   </div>
 </section>
 
@@ -23,7 +23,7 @@
 </section>
 
 <section class="card full">
-  <h2>Highest risk</h2>
+  <h2>{{ tr('panel.highest_risk') }}</h2>
   <div id="risk-list">
     {% for ip in risky_ips %}
     <div class="ip-row">
@@ -41,7 +41,7 @@
 </section>
 
 <section class="card full">
-  <h2>Flagged IPs</h2>
+  <h2>{{ tr('panel.flagged') }}</h2>
   <div id="flagged-list">
     {% for ip in flagged_ips %}
     <div class="ip-row" data-ip="{{ ip.ip }}">
@@ -71,7 +71,7 @@
 </section>
 
 <section class="card full">
-  <h2>Latest events</h2>
+  <h2>{{ tr('panel.latest') }}</h2>
   <div class="muted small" id="socket-state">connecting…</div>
   <table>
     <thead>

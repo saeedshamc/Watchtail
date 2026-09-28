@@ -11,18 +11,21 @@
   <header>
     <h1>watch<span>tail</span></h1>
     <nav>
-      <a href="{{ url_for('dashboard.dashboard') }}">Dashboard</a>
-      <a href="{{ url_for('events.browse') }}">Events</a>
-      <a href="{{ url_for('sources.manage') }}">Sources</a>
-      <a href="{{ url_for('respond.index') }}">Respond</a>
-      <a href="{{ url_for('suppressions.index') }}">Suppressions</a>
-      <a href="{{ url_for('settings.view') }}">Settings</a>
+      <a href="{{ url_for('dashboard.dashboard') }}">{{ tr('nav.dashboard') }}</a>
+      <a href="{{ url_for('events.browse') }}">{{ tr('nav.events') }}</a>
+      <a href="{{ url_for('sources.manage') }}">{{ tr('nav.sources') }}</a>
+      <a href="{{ url_for('respond.index') }}">{{ tr('nav.respond') }}</a>
+      <a href="{{ url_for('suppressions.index') }}">{{ tr('nav.suppressions') }}</a>
+      <a href="{{ url_for('settings.view') }}">{{ tr('nav.settings') }}</a>
     </nav>
     <div class="spacer"></div>
+    <a href="{{ url_for('locale.switch', lang='fa' if current_lang() == 'en' else 'en') }}" class="lang-toggle">
+      {{ 'فا' if current_lang() == 'en' else 'EN' }}
+    </a>
     {% if session.get('user') %}
     <span class="muted small">{{ session['user'] }}{% if session.get('role') == 'viewer' %} (viewer){% endif %}</span>
     <form method="post" action="{{ url_for('auth.logout') }}">
-      <button type="submit">Log out</button>
+      <button type="submit">{{ tr('nav.logout') }}</button>
     </form>
     {% endif %}
   </header>

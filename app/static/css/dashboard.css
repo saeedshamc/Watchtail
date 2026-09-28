@@ -415,6 +415,17 @@ h2 a:hover { color: var(--accent); }
   cursor: pointer;
 }
 
+/* --- Language toggle -------------------------------------------------- */
+.lang-toggle {
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--panel-edge);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-decoration: none;
+}
+.lang-toggle:hover { color: var(--text); border-color: var(--muted); }
+
 /* --- MITRE ATT&CK labels --------------------------------------------- */
 .mitre {
   display: inline-block;

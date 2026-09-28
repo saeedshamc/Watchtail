@@ -4,8 +4,8 @@
 <section class="card full">
   <h2>Events
     <span class="export-links">
-      <a href="{{ csv_url }}">download CSV</a>
-      <a href="{{ api_url }}">JSON API</a>
+      <a href="{{ csv_url }}">{{ tr('export.csv') }}</a>
+      <a href="{{ api_url }}">{{ tr('export.api') }}</a>
     </span>
   </h2>
 
@@ -30,8 +30,8 @@
       {% endfor %}
     </select>
     <input type="hidden" name="limit" value="{{ limit }}">
-    <button type="submit">Filter</button>
-    <a href="{{ url_for('events.browse') }}" class="muted small">reset</a>
+    <button type="submit">{{ tr('filter.apply') }}</button>
+    <a href="{{ url_for('events.browse') }}" class="muted small">{{ tr('filter.reset') }}</a>
   </form>
 
   <table>
