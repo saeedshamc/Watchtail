@@ -12,6 +12,7 @@ def register_blueprints(app):
     from .respond import bp as respond_bp
     from .reviews import bp as reviews_bp
     from .settings import bp as settings_bp
+    from .suppressions import bp as suppressions_bp
     from .sources import bp as sources_bp
 
     app.register_blueprint(health_bp)
@@ -22,6 +23,7 @@ def register_blueprints(app):
     app.register_blueprint(reviews_bp)
     app.register_blueprint(annotations_bp)
     app.register_blueprint(settings_bp)
+    app.register_blueprint(suppressions_bp)
     app.register_blueprint(respond_bp)
     app.register_blueprint(ip_detail_bp)
     app.register_blueprint(api_v1_bp)

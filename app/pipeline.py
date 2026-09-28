@@ -15,6 +15,7 @@ from .models import utcnow
 from .scoring import apply_alert
 from . import threatintel
 from .anomaly import BaselineEngine
+from .suppression import get_store as get_suppression_store
 
 logger = logging.getLogger("watchtail")
 
@@ -66,8 +67,16 @@ class Pipeline:
                 ]
         alert_rows = [self._persist_alert(alert) for alert in alerts]
 
+        # Suppression hides state changes and notifications, never the
+        # raw events: the record of what happened stays searchable.
+        suppression = get_suppression_store()
         flagged = False
         for row in alert_rows:
+            if suppression.is_suppressed(ip=row.ip, detector=row.detector):
+                logger.info(
+                    "alert suppressed (%s from %s)", row.detector, row.ip
+                )
+                continue
             self._mark_ip_flagged(row)
             flagged = True
             if self.notifiers is not None:

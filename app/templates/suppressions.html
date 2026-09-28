@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Suppressions · Watchtail{% endblock %}
+{% block content %}
+<section class="card full">
+  <h2>Alert suppressions
+    <span class="muted small">temporary silences that expire automatically</span>
+  </h2>
+
+  <form method="post" action="{{ url_for('suppressions.add') }}" class="filter-bar">
+    <input type="text" name="ip" placeholder="ip (optional)" size="18">
+    <input type="text" name="detector" placeholder="detector (optional)" size="20">
+    <input type="number" name="minutes" value="60" min="1" size="4" title="duration in minutes">
+    <input type="text" name="note" placeholder="why (e.g. nightly deploy)" size="28">
+    <button type="submit">Suppress</button>
+  </form>
+
+  <table>
+    <thead><tr><th>scope</th><th>note</th><th>by</th><th>expires (UTC)</th></tr></thead>
+    <tbody>
+      {% for rule in rules %}
+      <tr>
+        <td>
+          {% if rule.ip %}<code>{{ rule.ip }}</code>{% endif %}
+          {% if rule.detector %}<span class="badge reviewed">{{ rule.detector }}</span>{% endif %}
+        </td>
+        <td class="small">{{ rule.note or '' }}</td>
+        <td>{{ rule.actor }}</td>
+        <td>{{ rule.expires_at[:19].replace('T', ' ') }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="muted">No active suppressions — everything alerts normally.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if rules %}
+  <form method="post" action="{{ url_for('suppressions.clear') }}">
+    <button type="submit" class="respond-actions">Clear all</button>
+  </form>
+  {% endif %}
+</section>
+{% endblock %}
