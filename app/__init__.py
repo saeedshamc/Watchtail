@@ -71,6 +71,10 @@ def create_app(config_path=None, database_url=None):
 
     run_migrations()
 
+    from . import geoip
+
+    geoip.configure(settings.geoip_mmdb or None)
+
     _ensure_secret_key_file(app)
     _sync_log_sources(settings)
     _ensure_admin_user()

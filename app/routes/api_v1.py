@@ -19,6 +19,8 @@ bp = Blueprint("api_v1", __name__, url_prefix="/api/v1")
 
 
 def _serialize_ip(row):
+    from .. import geoip
+
     return {
         "ip": row.ip,
         "status": row.status,
@@ -28,6 +30,7 @@ def _serialize_ip(row):
         "score_level": score_level(row.threat_score or 0),
         "tags": list(row.tags or []),
         "operator_note": row.operator_note,
+        "geo": geoip.lookup(row.ip) if ":" not in row.ip and geoip.available() else None,
         "first_seen_at": row.first_seen_at.isoformat() + "Z" if row.first_seen_at else None,
         "last_alert_at": row.last_alert_at.isoformat() + "Z" if row.last_alert_at else None,
     }

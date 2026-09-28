@@ -41,6 +41,13 @@ def detail(ip):
         operator_note = ip_row.operator_note
         tags = list(ip_row.tags or [])
 
+    geo = None
+    if ":" not in ip:
+        from .. import geoip
+
+        if geoip.available():
+            geo = geoip.lookup(ip)
+
     return render_template(
         "ip_detail.html",
         ip=ip,
@@ -51,6 +58,7 @@ def detail(ip):
             "last_alert_at": last_alert_at,
             "operator_note": operator_note,
             "tags": tags,
+            "geo": geo,
         },
         alerts=alerts,
         events=events,

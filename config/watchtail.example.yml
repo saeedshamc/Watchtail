@@ -153,3 +153,8 @@ threat_intel:
   #    path: /etc/watchtail/firehol_level1.netset
   #  - name: abuseipdb-export
   #    path: /etc/watchtail/abuseipdb.csv
+
+# Optional offline geolocation for flagged IPs (GeoLite2-Country).
+# Requires: pip install geoip2
+# geoip:
+#   mmdb: /etc/watchtail/GeoLite2-Country.mmdb
