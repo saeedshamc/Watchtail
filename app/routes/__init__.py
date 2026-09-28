@@ -2,6 +2,7 @@
 
 
 def register_blueprints(app):
+    from .api_v1 import bp as api_v1_bp
     from .annotations import bp as annotations_bp
     from .auth import bp as auth_bp
     from .dashboard import bp as dashboard_bp
@@ -23,3 +24,4 @@ def register_blueprints(app):
     app.register_blueprint(settings_bp)
     app.register_blueprint(respond_bp)
     app.register_blueprint(ip_detail_bp)
+    app.register_blueprint(api_v1_bp)

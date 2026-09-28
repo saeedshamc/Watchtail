@@ -6,7 +6,7 @@ machine clients authenticate with ``Authorization: Bearer <token>``.
 
 from functools import wraps
 
-from flask import jsonify
+from flask import jsonify, request
 
 from . import tokens
 from .database import session_scope
