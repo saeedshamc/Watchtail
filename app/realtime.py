@@ -99,9 +99,13 @@ def interval_stats_payload() -> dict:
 
 
 def emit_stats():
-    """Queue a stats refresh (public API for callers outside the loop)."""
+    """Queue a stats refresh (public API for callers outside the loop).
+
+    Only a marker goes into the queue; the payload is built inside the
+    broadcaster's app context so callers never need one.
+    """
     try:
-        _queue.put_nowait({"stats": interval_stats_payload()})
+        _queue.put_nowait({"__stats": True})
     except queue.Full:
         pass
 
@@ -131,7 +135,12 @@ def start_broadcaster(app, interval_stats=STATS_INTERVAL_SECONDS):
                 return
             with app.app_context():
                 try:
-                    socketio.emit("activity", payload)
+                    if payload.get("__stats"):
+                        # The marker means "refresh now"; build the
+                        # snapshot here so it reflects current rows.
+                        socketio.emit("stats", interval_stats_payload())
+                    else:
+                        socketio.emit("activity", payload)
                 except Exception:
                     logger.exception("socketio emit failed")
 
@@ -139,7 +148,7 @@ def start_broadcaster(app, interval_stats=STATS_INTERVAL_SECONDS):
         interval = max(2, int(interval_stats))
         while not _broadcaster_stop.wait(interval):
             try:
-                payload = {"stats": interval_stats_payload()}
+                payload = interval_stats_payload()
             except Exception:
                 logger.exception("stats refresh failed")
                 continue

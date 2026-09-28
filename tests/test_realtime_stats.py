@@ -53,13 +53,15 @@ def test_stats_payload_counts_rows():
     assert payload["ts"].endswith("Z")
 
 
-def test_emit_stats_queues_snapshot():
+def test_emit_stats_queues_marker():
     original = realtime._queue
     try:
         realtime._queue = queue.Queue()
         realtime.emit_stats()
         payload = realtime._queue.get_nowait()
-        assert "stats" in payload
+        # Only a marker is queued; the broadcaster builds the payload
+        # inside its own app context.
+        assert payload == {"__stats": True}
     finally:
         realtime._queue = original
 
