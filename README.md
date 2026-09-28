@@ -58,6 +58,11 @@ Open `http://127.0.0.1:5555` and log in. If you skip
 `WATCHTAIL_ADMIN_PASSWORD`, a random password is generated and printed
 once at startup.
 
+Prefer containers? `docker compose up -d` gives you the same dashboard
+with persistent storage — see [docs/INSTALL.md](docs/INSTALL.md) for
+the Docker section. Lost the admin password? Reset it with
+`python -m app.cli passwd`.
+
 ### Running the tests
 
 ```bash
@@ -145,24 +150,28 @@ startup.
 
 ```
 app/
-  __init__.py      app factory, source sync, admin bootstrap
-  config.py        YAML settings loader
+  __init__.py      app factory, security headers, admin bootstrap
+  cli.py           `python -m app.cli passwd` admin CLI
+  config.py        YAML settings loader (WATCHTAIL_CONFIG aware)
   database.py      engine/session management
   models.py        LogSource, Event, Alert, IpStatus, AdminUser
   tailer.py        per-source tail threads with rotation handling
   pipeline.py      tailer -> persistence -> detection -> notifier
-  realtime.py      Socket.IO broadcaster
+  realtime.py      Socket.IO broadcaster + periodic stats snapshots
   auth.py          session auth helpers
   parsers/         nginx, apache, auth.log line parsers
-  detectors/       brute force, 4xx spike, burst rules + engine
+  detectors/       brute force, 4xx spike, burst, path scan, ssh compromise
   notifiers/       webhook notifier + registry
-  routes/          dashboard, sources, reviews, auth, health
+  routes/          dashboard, events browser, ip detail, sources, reviews, auth, health
   templates/       Jinja2 templates
   static/          CSS, JS and vendored vendor bundles
 config/            example watchtail.yml
 tests/             pytest suites
 scripts/           vendor fetch helper
-run.py             entrypoint
+Dockerfile         production image (gunicorn + eventlet, non-root)
+docker-compose.yml single-container deployment with persistent volume
+run.py             entrypoint (dev/server mode with live tailing)
+wsgi.py            WSGI entrypoint for gunicorn
 ```
 
 ## License

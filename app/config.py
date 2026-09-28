@@ -13,6 +13,19 @@ import yaml
 DEFAULT_CONFIG_LOCATIONS = ("watchtail.yml", os.path.join("config", "watchtail.example.yml"))
 
 
+def _resolve_config_path(config_path):
+    """Explicit argument, then WATCHTAIL_CONFIG, then default spots."""
+    if config_path:
+        return config_path
+    env_path = os.environ.get("WATCHTAIL_CONFIG")
+    if env_path:
+        return env_path
+    for candidate in DEFAULT_CONFIG_LOCATIONS:
+        if os.path.exists(candidate):
+            return candidate
+    return None
+
+
 @dataclass
 class SourceEntry:
     name: str
@@ -53,12 +66,7 @@ def load_config(config_path: Optional[str] = None) -> Settings:
     Missing files fall back to the packaged example so the app always
     boots; unknown keys are ignored to keep forward compatibility.
     """
-    path = config_path
-    if path is None:
-        for candidate in DEFAULT_CONFIG_LOCATIONS:
-            if os.path.exists(candidate):
-                path = candidate
-                break
+    path = _resolve_config_path(config_path)
     if path is None or not os.path.exists(path):
         return Settings()
 

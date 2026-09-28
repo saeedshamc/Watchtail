@@ -148,6 +148,54 @@ uploads them as artifacts; attach them to the GitHub release.
 
 ---
 
+## Docker
+
+The repository ships a production-style image (gunicorn + eventlet,
+non-root, tini as PID 1):
+
+```bash
+git clone <repo> && cd watchtail
+docker compose up -d          # or: docker build -t watchtail . && docker run ...
+```
+
+`docker-compose.yml` publishes port 5555 and keeps all state (SQLite
+database, session key, starter config) in the `watchtail-data` volume.
+The dashboard is at `http://<host>:5555`.
+
+Environment variables:
+
+- `WATCHTAIL_ADMIN_PASSWORD` — **required** in Docker; the entrypoint
+  refuses to start without it so no unreachable generated credential
+  is ever printed into logs. Change the password later with
+  `docker compose exec watchtail python -m app.cli passwd`.
+- `WATCHTAIL_PORT` — container-side port (default `5555`).
+- `WATCHTAIL_CONFIG` — point at a mounted config (default writes a
+  starter `watchtail.yml` into the volume on first boot).
+- `WATCHTAIL_DATABASE_URL` — defaults to `sqlite:////data/watchtail.db`.
+
+Tailing host log files: mount them read-only and list them in the
+config inside the volume, e.g. for a Linux host's auth log:
+
+```yaml
+# /var/lib/docker/volumes/watchtail_watchtail-data/_data/watchtail.yml
+sources:
+  - name: host auth log
+    type: auth
+    path: /var/log/auth.log
+```
+
+```yaml
+# docker-compose.yml (excerpt)
+    volumes:
+      - watchtail-data:/data
+      - /var/log/auth.log:/var/log/auth.log:ro
+```
+
+Restart the container after editing the config (`docker compose
+restart watchtail`); sources sync on startup.
+
+---
+
 ## Configuration and secrets
 
 All builds read the same settings, in the same way:

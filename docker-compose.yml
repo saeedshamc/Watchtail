@@ -1,0 +1,31 @@
+services:
+  watchtail:
+    build: .
+    image: watchtail:latest
+    container_name: watchtail
+    restart: unless-stopped
+    ports:
+      - "5555:5555"
+    environment:
+      # Required: the entrypoint refuses to boot without a password.
+      WATCHTAIL_ADMIN_PASSWORD: "change-me"
+      WATCHTAIL_PORT: "5555"
+      # Log files must be readable from inside the container.
+      # WATCHTAIL_CONFIG: /data/watchtail.yml   # optional custom config
+    volumes:
+      - watchtail-data:/data
+      # Mount the logs you want to tail, then list them in
+      # /data/watchtail.yml; example for Linux host auth logs:
+      # - /var/log/auth.log:/var/log/auth.log:ro
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request;urllib.request.urlopen('http://127.0.0.1:5555/health').read()"
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+
+volumes:
+  watchtail-data:
