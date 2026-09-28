@@ -8,7 +8,8 @@ from sqlalchemy import func, select
 from ..auth import login_required
 from ..database import session_scope
 from ..models import Alert, Event, IpStatus, LogSource, utcnow
-from ..queries import active_flagged_ips, fresh_flagged_count
+from ..queries import active_flagged_ips, fresh_flagged_count, top_risky_ips
+from ..scoring import score_level
 
 bp = Blueprint("dashboard", __name__)
 
@@ -66,6 +67,7 @@ def dashboard():
             session.query(Event).order_by(Event.ts.desc(), Event.id.desc()).limit(30).all()
         )
         flagged_ips = active_flagged_ips(session, settings, limit=20)
+        risky_ips = top_risky_ips(session, limit=10)
         labels, traffic, errors = _chart_series(session)
 
     stats = {
@@ -75,11 +77,15 @@ def dashboard():
         "active_sources": active_sources or 0,
         "source_count": source_count or 0,
     }
+    for row in flagged_ips:
+        row.current_score = getattr(row, "current_score", 0)
     return render_template(
         "dashboard.html",
         stats=stats,
         recent_events=recent_events,
         flagged_ips=flagged_ips,
+        risky_ips=risky_ips,
+        score_level=score_level,
         chart_labels=labels,
         chart_traffic=traffic,
         chart_errors=errors,

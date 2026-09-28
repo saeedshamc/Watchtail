@@ -23,12 +23,31 @@
 </section>
 
 <section class="card full">
+  <h2>Highest risk</h2>
+  <div id="risk-list">
+    {% for ip in risky_ips %}
+    <div class="ip-row">
+      <span class="ip"><a href="{{ url_for('ip_detail.detail', ip=ip.ip) }}"><code>{{ ip.ip }}</code></a></span>
+      <span class="score-bar" title="threat score {{ ip.current_score }}">
+        <span class="score-fill {{ score_level(ip.current_score) }}" style="width: {{ [ip.current_score / 3, 100] | min }}%"></span>
+      </span>
+      <span class="score-num {{ score_level(ip.current_score) }}">{{ ip.current_score }}</span>
+      <span class="reason">{{ ip.alert_count }} alerts</span>
+    </div>
+    {% else %}
+    <div class="muted small">No scored threats yet.</div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card full">
   <h2>Flagged IPs</h2>
   <div id="flagged-list">
     {% for ip in flagged_ips %}
     <div class="ip-row" data-ip="{{ ip.ip }}">
       <span class="ip"><a href="{{ url_for('ip_detail.detail', ip=ip.ip) }}"><code>{{ ip.ip }}</code></a></span>
       <span class="badge {{ ip.status }}">{{ ip.status }}</span>
+      <span class="score-num {{ score_level(ip.current_score or 0) }}" title="threat score">{{ ip.current_score or 0 }}</span>
       <span class="reason">{{ ip.reason or '' }} · {{ ip.alert_count }} alerts</span>
       {% if ip.tags %}
       <span class="tag-row">

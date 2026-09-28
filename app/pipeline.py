@@ -12,6 +12,7 @@ from .database import session_scope
 from .detectors import DetectionEngine
 from .models import Alert, Event, IpStatus
 from .models import utcnow
+from .scoring import apply_alert
 
 logger = logging.getLogger("watchtail")
 
@@ -120,6 +121,9 @@ class Pipeline:
                     row.alert_count += 1
                     row.reason = alert_row.message
                     row.last_alert_at = utcnow()
+                # Score lives on the same row; decay-then-bump keeps
+                # repeat offenders hot and quiet IPs cooling off.
+                apply_alert(session, alert_row.ip, alert_row.severity)
         except Exception:
             logger.exception("could not flag ip %s", alert_row.ip)
 

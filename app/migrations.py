@@ -26,6 +26,16 @@ COLUMN_MIGRATIONS = [
         "tags",
         "ALTER TABLE ip_status ADD COLUMN tags JSON DEFAULT '[]'",
     ),
+    (
+        "ip_status",
+        "threat_score",
+        "ALTER TABLE ip_status ADD COLUMN threat_score INTEGER DEFAULT 0",
+    ),
+    (
+        "ip_status",
+        "last_scored_at",
+        "ALTER TABLE ip_status ADD COLUMN last_scored_at DATETIME",
+    ),
 ]
 
 

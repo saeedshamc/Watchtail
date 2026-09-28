@@ -335,6 +335,30 @@ h2 a:hover { color: var(--accent); }
   100% { background: transparent; }
 }
 
+/* --- Threat score --------------------------------------------------- */
+.score-bar {
+  width: 110px;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(138, 148, 163, 0.18);
+  overflow: hidden;
+}
+.score-fill { display: block; height: 100%; border-radius: 4px; }
+.score-fill.low { background: var(--ok); }
+.score-fill.medium { background: var(--medium); }
+.score-fill.high { background: var(--high); }
+.score-fill.critical { background: #ff4d6d; }
+.score-num {
+  min-width: 34px;
+  text-align: right;
+  font-family: monospace;
+  font-size: 0.82rem;
+}
+.score-num.low { color: var(--ok); }
+.score-num.medium { color: var(--medium); }
+.score-num.high { color: var(--high); }
+.score-num.critical { color: #ff4d6d; font-weight: 700; }
+
 /* --- Operator notes and tags --------------------------------------- */
 .tag-row { display: inline-flex; gap: 0.3rem; flex-wrap: wrap; }
 

@@ -118,6 +118,8 @@ class IpStatus(Base):
     updated_at: Mapped[dt.datetime] = mapped_column(DateTime, default=utcnow)
     operator_note: Mapped[str | None] = mapped_column(Text)
     tags: Mapped[list] = mapped_column(JSON, default=list)
+    threat_score: Mapped[int] = mapped_column(Integer, default=0)
+    last_scored_at: Mapped[dt.datetime | None] = mapped_column(DateTime)
 
     def add_tag(self, tag: str):
         """Add a tag once (case-insensitive, trimmed, max length guarded)."""

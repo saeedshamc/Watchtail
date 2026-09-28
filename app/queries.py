@@ -9,6 +9,13 @@ import datetime as dt
 from sqlalchemy import or_
 
 from .models import IpStatus, utcnow
+from .scoring import decayed_score
+
+
+def _with_score(row):
+    """Attach a freshly decayed score as a plain attribute."""
+    row.current_score = decayed_score(row.threat_score or 0, row.last_scored_at)
+    return row
 
 
 def active_flagged_ips(session, settings, limit=100):
@@ -37,6 +44,26 @@ def active_flagged_ips(session, settings, limit=100):
         .limit(limit)
         .all()
     )
+    return [_with_score(row) for row in rows]
+
+
+def top_risky_ips(session, limit=20):
+    """Highest-scoring IPs regardless of review state, for the dashboard.
+
+    A dismissed IP keeps its score history but is excluded: the
+    operator closed that conversation on purpose.
+    """
+    rows = (
+        session.query(IpStatus)
+        .filter(IpStatus.status != "dismissed")
+        .filter(IpStatus.threat_score > 0)
+        .order_by(IpStatus.threat_score.desc())
+        .limit(limit * 2)
+        .all()
+    )
+    scored = [_with_score(row) for row in rows]
+    scored.sort(key=lambda r: r.current_score, reverse=True)
+    return scored[:limit]
 
 
 def fresh_flagged_count(session, settings):
