@@ -103,7 +103,8 @@ class IpStatus(Base):
 
     Rows are created when an IP is flagged. ``status`` is one of
     ``flagged``, ``reviewed`` or ``dismissed``; dismissed IPs are never
-    re-flagged by the engine.
+    re-flagged by the engine. Operators can annotate rows with free-form
+    tags and a note so investigations survive dashboard visits.
     """
 
     __tablename__ = "ip_status"
@@ -115,6 +116,19 @@ class IpStatus(Base):
     first_seen_at: Mapped[dt.datetime] = mapped_column(DateTime, default=utcnow)
     last_alert_at: Mapped[dt.datetime | None] = mapped_column(DateTime)
     updated_at: Mapped[dt.datetime] = mapped_column(DateTime, default=utcnow)
+    operator_note: Mapped[str | None] = mapped_column(Text)
+    tags: Mapped[list] = mapped_column(JSON, default=list)
+
+    def add_tag(self, tag: str):
+        """Add a tag once (case-insensitive, trimmed, max length guarded)."""
+        tag = (tag or "").strip().lower()[:40]
+        if tag and tag not in (self.tags or []):
+            self.tags = list(self.tags or []) + [tag]
+
+    def remove_tag(self, tag: str):
+        tag = (tag or "").strip().lower()[:40]
+        if tag in (self.tags or []):
+            self.tags = [t for t in self.tags if t != tag]
 
     def __repr__(self) -> str:  # pragma: no cover - debugging aid
         return f"<IpStatus {self.ip} {self.status}>"

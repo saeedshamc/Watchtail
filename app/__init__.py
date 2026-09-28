@@ -67,6 +67,10 @@ def create_app(config_path=None, database_url=None):
     configure_engine(app.config["SQLALCHEMY_DATABASE_URI"])
     create_all()
 
+    from .migrations import run_migrations
+
+    run_migrations()
+
     _ensure_secret_key_file(app)
     _sync_log_sources(settings)
     _ensure_admin_user()
