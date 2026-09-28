@@ -30,6 +30,27 @@ sources:
     path: /var/log/apache2/access.log
     enabled: false
 
+  # Generic syslog (any program: cron, su, sudo, routers...).
+  - name: generic syslog
+    type: syslog
+    path: /var/log/syslog
+    enabled: false
+
+  # RFC 5424 formatted syslog (rsyslog omfile with
+  # RSYSLOG_SyslogProtocol23Format template), structured data is kept.
+  - name: rfc5424 stream
+    type: syslog5424
+    path: /var/log/remote/5424.log
+    enabled: false
+
+  # JSON-lines logs (one object per line). Timestamp/client/status
+  # fields are recognised under their common names, e.g. nginx
+  # access logs written with escape=json.
+  - name: application json log
+    type: json
+    path: /var/log/myapp/app.jsonl
+    enabled: false
+
 detectors:
   # N failed SSH logins from one IP within X seconds.
   ssh_bruteforce:

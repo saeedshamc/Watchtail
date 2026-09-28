@@ -13,8 +13,9 @@ config, run one command, open a browser.
 
 - **Live tailing** of any number of log files, one worker thread per
   source, with rotation and truncation handling
-- **Parsers** for nginx and Apache combined access logs and Linux
-  `auth.log` (sshd) lines
+- **Parsers** for nginx and Apache combined access logs, Linux
+  `auth.log` (sshd), generic and RFC 5424 syslog, and JSON-lines
+  structured logs
 - **Rule-based detection**: failed-SSH-login bursts, 403/404 spikes and
   request bursts per IP, all with configurable thresholds and windows
 - **Live dashboard** — server-rendered pages, Chart.js traffic and 4xx
@@ -87,7 +88,7 @@ database:
 
 sources:
   - name: auth log
-    type: auth            # auth | nginx | apache
+    type: auth            # auth | nginx | apache | syslog | syslog5424 | json
     path: /var/log/auth.log
     enabled: true
 
@@ -159,7 +160,7 @@ app/
   pipeline.py      tailer -> persistence -> detection -> notifier
   realtime.py      Socket.IO broadcaster + periodic stats snapshots
   auth.py          session auth helpers
-  parsers/         nginx, apache, auth.log line parsers
+  parsers/         nginx, apache, auth, syslog, rfc5424, json-lines
   detectors/       brute force, 4xx spike, burst, path scan, ssh compromise
   notifiers/       webhook notifier + registry
   routes/          dashboard, events browser, ip detail, sources, reviews, auth, health
