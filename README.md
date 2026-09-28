@@ -17,10 +17,22 @@ config, run one command, open a browser.
   `auth.log` (sshd), generic and RFC 5424 syslog, and JSON-lines
   structured logs
 - **Rule-based detection**: failed-SSH-login bursts, 403/404 spikes,
-  request bursts, path scanning, post-failure SSH logins and
-  distributed credential-stuffing campaigns (many IPs against one
-  account) — all with thresholds, windows and severities editable from
-  the settings page
+  request bursts, path scanning, post-failure SSH logins, distributed
+  credential-stuffing campaigns and multi-signal correlation — all
+  with thresholds, windows and severities editable from the settings
+  page
+- **Threat scoring** with time decay, surfacing the highest-risk IPs
+  first on a dedicated dashboard panel
+- **Threat intel**: local blocklists (FireHOL netsets, AbuseIPDB CSV)
+  flag known-bad addresses as critical on first sight; optional
+  offline GeoIP country enrichment
+- **Alerting your way**: webhook, email (SMTP) and Telegram with
+  per-channel severity routing plus a daily digest — and a REST API
+  with hashed bearer tokens for machine integrations
+- **Response workflow**: ready-to-review firewall commands for six
+  platforms with an immutable audit trail (watchtail never touches
+  the firewall itself)
+- **Multi-user** with admin and viewer roles, managed via the CLI
 - **Live dashboard** — server-rendered pages, Chart.js traffic and 4xx
   graphs, event table updating over Socket.IO
 - **Flagged IPs** with one-click review or dismissal, operator notes
@@ -168,7 +180,12 @@ app/
   settings route   detector thresholds UI writing back to config
   detectors/       brute force, 4xx spike, burst, path scan, ssh compromise
   notifiers/       webhook notifier + registry
-  routes/          dashboard, events browser, ip detail, sources, reviews, auth, health
+  routes/          dashboard, events, ip detail, respond, settings, api v1, sources, reviews, auth, health
+  scoring.py       threat score with decay
+  threatintel.py   local blocklist store and lookup
+  response.py      firewall command suggestions + audit trail
+  tokens.py        hashed API token lifecycle
+  geoip.py         optional offline country enrichment
   templates/       Jinja2 templates
   static/          CSS, JS and vendored vendor bundles
 config/            example watchtail.yml
