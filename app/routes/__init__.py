@@ -9,6 +9,7 @@ def register_blueprints(app):
     from .events import bp as events_bp
     from .health import bp as health_bp
     from .ip_detail import bp as ip_detail_bp
+    from .metrics import bp as metrics_bp
     from .respond import bp as respond_bp
     from .reviews import bp as reviews_bp
     from .settings import bp as settings_bp
@@ -27,3 +28,4 @@ def register_blueprints(app):
     app.register_blueprint(respond_bp)
     app.register_blueprint(ip_detail_bp)
     app.register_blueprint(api_v1_bp)
+    app.register_blueprint(metrics_bp)
