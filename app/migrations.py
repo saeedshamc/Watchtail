@@ -36,6 +36,11 @@ COLUMN_MIGRATIONS = [
         "last_scored_at",
         "ALTER TABLE ip_status ADD COLUMN last_scored_at DATETIME",
     ),
+    (
+        "admin_users",
+        "role",
+        "ALTER TABLE admin_users ADD COLUMN role VARCHAR(16) DEFAULT 'admin'",
+    ),
 ]
 
 

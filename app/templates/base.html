@@ -19,7 +19,7 @@
     </nav>
     <div class="spacer"></div>
     {% if session.get('user') %}
-    <span class="muted small">{{ session['user'] }}</span>
+    <span class="muted small">{{ session['user'] }}{% if session.get('role') == 'viewer' %} (viewer){% endif %}</span>
     <form method="post" action="{{ url_for('auth.logout') }}">
       <button type="submit">Log out</button>
     </form>

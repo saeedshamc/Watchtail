@@ -56,6 +56,40 @@ def test_passwd_rejects_empty_password():
     assert main(["passwd", "--password", ""]) == 2
 
 
+def test_user_add_creates_viewer(monkeypatch):
+    monkeypatch.setenv("WATCHTAIL_DATABASE_URL", "sqlite:///:memory:")
+    exit_code = main(
+        ["user-add", "soc1", "--role", "viewer", "--password", "viewer-pass"]
+    )
+    assert exit_code == 0
+    with session_scope() as session:
+        user = session.get(AdminUser, "soc1")
+        assert user.role == "viewer"
+        assert check_password_hash(user.password_hash, "viewer-pass")
+
+
+def test_user_add_rejects_duplicate_and_bad_role(monkeypatch):
+    monkeypatch.setenv("WATCHTAIL_DATABASE_URL", "sqlite:///:memory:")
+    assert main(["user-add", "u1", "--password", "x-pass"]) == 0
+    assert main(["user-add", "u1", "--password", "x-pass"]) == 2
+    # argparse itself rejects unknown roles with SystemExit.
+    with pytest.raises(SystemExit):
+        main(["user-add", "u2", "--role", "root", "--password", "x"])
+
+
+def test_viewer_account_can_log_in(monkeypatch):
+    monkeypatch.setenv("WATCHTAIL_DATABASE_URL", "sqlite:///:memory:")
+    main(["user-add", "soc2", "--password", "viewer-pass"])
+    application = watchtail_app.create_app(database_url="sqlite:///:memory:")
+    test_client = application.test_client()
+    response = test_client.post(
+        "/login", data={"username": "soc2", "password": "viewer-pass"}
+    )
+    assert response.status_code == 302
+    with test_client.session_transaction() as session:
+        assert session["role"] == "viewer"
+
+
 def test_password_change_takes_effect_on_login(memory_app):
     assert main(["passwd", "--password", "rotated-secret"]) == 0
     test_client = memory_app.test_client()

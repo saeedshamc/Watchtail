@@ -1,4 +1,4 @@
-"""Login and logout routes for the single admin account."""
+"""Login and logout routes for dashboard accounts."""
 
 import time
 
@@ -34,9 +34,11 @@ def login():
         else:
             username = request.form.get("username", "")
             password = request.form.get("password", "")
-            if verify_credentials(username, password):
+            ok, role = verify_credentials(username, password)
+            if ok:
                 session.clear()
                 session["user"] = username
+                session["role"] = role or "admin"
                 session.permanent = True
                 target = request.args.get("next") or url_for("dashboard.dashboard")
                 if not target.startswith("/"):

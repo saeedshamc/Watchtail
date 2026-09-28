@@ -137,12 +137,18 @@ class IpStatus(Base):
 
 
 class AdminUser(Base):
-    """Single dashboard account."""
+    """Dashboard account. ``role`` is ``admin`` or ``viewer``.
+
+    Admins manage sources, settings, tokens and response actions;
+    viewers get read-only access to every page (their write routes are
+    rejected with a flash before anything changes).
+    """
 
     __tablename__ = "admin_users"
 
     username: Mapped[str] = mapped_column(String(64), primary_key=True)
     password_hash: Mapped[str] = mapped_column(String(255))
+    role: Mapped[str] = mapped_column(String(16), default="admin")
 
 
 class AuditEntry(Base):

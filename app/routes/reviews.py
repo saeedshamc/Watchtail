@@ -2,7 +2,7 @@
 
 from flask import Blueprint, flash, jsonify, redirect, request, url_for
 
-from ..auth import login_required
+from ..auth import admin_required, login_required
 from ..database import session_scope
 from ..models import IpStatus
 from ..queries import active_flagged_ips
@@ -43,7 +43,7 @@ def _settings():
 
 
 @bp.post("/ips/<path:ip>/status")
-@login_required
+@admin_required
 def update_status(ip):
     action = (request.form.get("action") or "").strip().lower()
     if action not in VALID_ACTIONS:

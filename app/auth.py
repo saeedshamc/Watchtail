@@ -1,28 +1,57 @@
 """Session-based authentication for the dashboard.
 
-A single admin account lives in the database (bootstrapped by the app
-factory). Passwords are verified with werkzeug's PBKDF2 helper; login
-state is a plain signed session cookie.
+Accounts live in the database (bootstrapped by the app factory, extra
+ones via the CLI). Passwords are verified with werkzeug's PBKDF2
+helper; login state is a plain signed session cookie carrying the
+role. Viewers see everything; only admins may change state.
 """
 
 from functools import wraps
 
-from flask import redirect, request, session, url_for
+from flask import flash, redirect, request, session, url_for
 from werkzeug.security import check_password_hash
 
 from .database import session_scope
 from .models import AdminUser
 
 
+def current_role() -> str:
+    """Role of the signed-in user; empty when anonymous."""
+    return session.get("role") or ""
+
+
+def is_admin() -> bool:
+    return current_role() == "admin"
+
+
 def verify_credentials(username, password):
-    """Return True when the username/password pair matches the admin."""
+    """Return (ok, role) for a matching account."""
     if not username or not password:
-        return False
+        return False, ""
     with session_scope() as db:
         user = db.get(AdminUser, username)
         if user is None:
-            return False
-        return bool(check_password_hash(user.password_hash, password))
+            return False, ""
+        if check_password_hash(user.password_hash, password):
+            return True, (user.role or "admin")
+        return False, ""
+
+
+def admin_required(view):
+    """Block non-admin (or anonymous) users from state-changing routes."""
+
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        if not session.get("user"):
+            if request.path.startswith(("/api/", "/socket.io")):
+                return jsonify_error()
+            return redirect(url_for("auth.login", next=request.path))
+        if not is_admin():
+            flash("This action requires an admin account.")
+            return redirect(request.referrer or url_for("dashboard.dashboard"))
+        return view(*args, **kwargs)
+
+    return wrapped
 
 
 def login_required(view):

@@ -2,7 +2,7 @@
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from ..auth import login_required
+from ..auth import admin_required, login_required
 from ..database import session_scope
 from ..models import IpStatus
 from ..response import build_commands, recent_actions, record_action
@@ -41,7 +41,7 @@ def index():
 
 
 @bp.post("/respond/ack")
-@login_required
+@admin_required
 def acknowledge():
     ip = (request.form.get("ip") or "").strip()
     platform = (request.form.get("platform") or "").strip() or None

@@ -4,7 +4,7 @@ import os
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from ..auth import login_required
+from ..auth import admin_required, login_required
 from ..database import session_scope
 from ..manager import resync_tailing
 from ..models import LogSource
@@ -24,7 +24,7 @@ def manage():
 
 
 @bp.post("/sources/add")
-@login_required
+@admin_required
 def add():
     name = (request.form.get("name") or "").strip()
     source_type = (request.form.get("type") or "").strip().lower()
@@ -59,7 +59,7 @@ def add():
 
 
 @bp.post("/sources/<int:source_id>/toggle")
-@login_required
+@admin_required
 def toggle(source_id):
     with session_scope() as session:
         source = session.get(LogSource, source_id)
@@ -73,7 +73,7 @@ def toggle(source_id):
 
 
 @bp.post("/sources/<int:source_id>/delete")
-@login_required
+@admin_required
 def delete(source_id):
     with session_scope() as session:
         source = session.get(LogSource, source_id)

@@ -10,7 +10,7 @@ import logging
 
 from flask import Blueprint, current_app, flash, redirect, render_template, request, url_for
 
-from ..auth import login_required
+from ..auth import admin_required, login_required
 from ..database import session_scope
 from ..detectors.engine import DETECTOR_CLASSES
 from ..models import LogSource
@@ -179,7 +179,7 @@ def _ruamel_available():
 
 
 @bp.post("/settings")
-@login_required
+@admin_required
 def save():
     settings = current_app.config["WATCHTAIL_SETTINGS"]
     config_path = settings.config_path

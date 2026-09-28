@@ -2,7 +2,7 @@
 
 from flask import Blueprint, flash, redirect, request, url_for
 
-from ..auth import login_required
+from ..auth import admin_required, login_required
 from ..database import session_scope
 from ..models import IpStatus
 
@@ -21,7 +21,7 @@ def _safe_redirect(ip, fallback):
 
 
 @bp.post("/ips/<path:ip>/annotate")
-@login_required
+@admin_required
 def annotate(ip):
     note = (request.form.get("note") or "").strip()[:MAX_NOTE_LENGTH]
     raw_tags = (request.form.get("tags") or "").strip()
@@ -44,7 +44,7 @@ def annotate(ip):
 
 
 @bp.post("/ips/<path:ip>/tags/remove")
-@login_required
+@admin_required
 def remove_tag(ip):
     tag = (request.form.get("tag") or "").strip()
     with session_scope() as session:
