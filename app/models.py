@@ -165,3 +165,25 @@ class AuditEntry(Base):
 
     def __repr__(self) -> str:  # pragma: no cover - debugging aid
         return f"<AuditEntry {self.action} {self.target_ip} by {self.actor}>"
+
+
+class ApiToken(Base):
+    """Bearer token for machine access to the REST API.
+
+    Only the SHA-256 hash of the token is stored; the plain value is
+    shown once at creation time. ``can_write`` gates status-changing
+    endpoints (review, dismiss, annotate).
+    """
+
+    __tablename__ = "api_tokens"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(80))
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True)
+    can_write: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=utcnow)
+    last_used_at: Mapped[dt.datetime | None] = mapped_column(DateTime)
+    revoked: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    def __repr__(self) -> str:  # pragma: no cover - debugging aid
+        return f"<ApiToken {self.name} revoked={self.revoked}>"
