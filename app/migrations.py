@@ -41,6 +41,11 @@ COLUMN_MIGRATIONS = [
         "role",
         "ALTER TABLE admin_users ADD COLUMN role VARCHAR(16) DEFAULT 'admin'",
     ),
+    (
+        "admin_users",
+        "totp_secret",
+        "ALTER TABLE admin_users ADD COLUMN totp_secret VARCHAR(64)",
+    ),
 ]
 
 

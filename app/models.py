@@ -149,6 +149,7 @@ class AdminUser(Base):
     username: Mapped[str] = mapped_column(String(64), primary_key=True)
     password_hash: Mapped[str] = mapped_column(String(255))
     role: Mapped[str] = mapped_column(String(16), default="admin")
+    totp_secret: Mapped[str | None] = mapped_column(String(64))
 
 
 class AuditEntry(Base):

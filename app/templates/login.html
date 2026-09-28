@@ -9,6 +9,12 @@
     <input id="username" name="username" autocomplete="username" required autofocus>
     <label for="password">Password</label>
     <input id="password" name="password" type="password" autocomplete="current-password" required>
+    {% if twofact_user %}
+    <input type="hidden" name="username" value="{{ twofact_user }}">
+    <input type="hidden" name="password" value="{{ request.form.get('password', '') }}">
+    <label for="code">Authenticator code</label>
+    <input id="code" name="code" inputmode="numeric" pattern="[0-9]*" maxlength="6" required autofocus>
+    {% endif %}
     <button type="submit">Log in</button>
   </form>
 </div>

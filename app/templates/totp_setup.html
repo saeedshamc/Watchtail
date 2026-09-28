@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Two-factor · Watchtail{% endblock %}
+{% block content %}
+<section class="card full">
+  <h2>Two-factor authentication (TOTP)</h2>
+  {% if enrolled %}
+  <p class="muted small">Two-factor is <strong>active</strong> for this account. Enter a 6-digit code at every login.</p>
+  <form method="post" action="{{ url_for('auth.totp_disable') }}">
+    <button type="submit">Disable two-factor</button>
+  </form>
+  {% else %}
+  <p class="muted small">
+    Add this secret to your authenticator app (Aegis, Google Authenticator,
+    1Password...), then use the 6-digit code at your next login.
+  </p>
+  <p><code style="font-size: 1.2rem;">{{ secret }}</code></p>
+  <p class="muted small">otpauth URI (for QR generation):</p>
+  <p><code class="small">{{ uri }}</code></p>
+  {% endif %}
+</section>
+{% endblock %}
