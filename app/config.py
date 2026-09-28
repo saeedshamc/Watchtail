@@ -49,6 +49,7 @@ class Settings:
     digest_hour_utc: int = 7
     threatintel: dict = field(default_factory=dict)
     geoip_mmdb: str = ""
+    playbooks: list = field(default_factory=list)
     retention_max_age_days: int = 14
     config_dir: str = "."
     config_path: str = ""
@@ -133,6 +134,8 @@ def load_config(config_path: Optional[str] = None) -> Settings:
     }
 
     settings.geoip_mmdb = str((raw.get("geoip") or {}).get("mmdb") or "")
+
+    settings.playbooks = list(raw.get("playbooks") or [])
 
     return settings
 

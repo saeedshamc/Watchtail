@@ -75,6 +75,10 @@ def create_app(config_path=None, database_url=None):
 
     geoip.configure(settings.geoip_mmdb or None)
 
+    from .playbooks import configure as configure_playbooks
+
+    configure_playbooks(settings.playbooks)
+
     _ensure_secret_key_file(app)
     _sync_log_sources(settings)
     _ensure_admin_user()

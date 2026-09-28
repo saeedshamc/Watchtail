@@ -15,6 +15,7 @@ from .models import utcnow
 from .scoring import apply_alert
 from . import threatintel
 from .anomaly import BaselineEngine
+from .playbooks import get_engine as get_playbook_engine
 from .suppression import get_store as get_suppression_store
 
 logger = logging.getLogger("watchtail")
@@ -79,6 +80,16 @@ class Pipeline:
                 continue
             self._mark_ip_flagged(row)
             flagged = True
+            # Playbooks run after the flag state is settled so their
+            # tag/escalate actions see the current row.
+            try:
+                with session_scope() as session:
+                    ip_row = session.get(IpStatus, row.ip)
+                    outcomes = get_playbook_engine().process(row, ip_row)
+                for outcome in outcomes:
+                    logger.info("playbook: %s", outcome)
+            except Exception:
+                logger.exception("playbook processing failed")
             if self.notifiers is not None:
                 self.notifiers.dispatch(row)
 
