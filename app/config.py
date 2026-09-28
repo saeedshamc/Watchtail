@@ -45,6 +45,7 @@ class Settings:
     webhook_timeout_seconds: float = 5.0
     retention_max_age_days: int = 14
     config_dir: str = "."
+    config_path: str = ""
 
     def detector(self, name: str) -> dict:
         return self.detectors.get(name, {})
@@ -73,7 +74,10 @@ def load_config(config_path: Optional[str] = None) -> Settings:
     with open(path, "r", encoding="utf-8") as fh:
         raw = yaml.safe_load(fh) or {}
 
-    settings = Settings(config_dir=os.path.dirname(os.path.abspath(path)))
+    settings = Settings(
+        config_dir=os.path.dirname(os.path.abspath(path)),
+        config_path=os.path.abspath(path),
+    )
 
     server = raw.get("server") or {}
     settings.host = str(server.get("host", settings.host))

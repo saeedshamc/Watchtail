@@ -13,6 +13,7 @@ class SshBruteforceDetector(Detector):
 
     name = "ssh_bruteforce"
     interested_kinds = ("ssh_auth_fail",)
+    default_severity = "high"
 
     def __init__(self, options):
         super().__init__(options)
@@ -43,7 +44,7 @@ class SshBruteforceDetector(Detector):
                 DetectorAlert(
                     detector=self.name,
                     ip=ip,
-                    severity="high",
+                    severity=self.severity,
                     message=(
                         f"{len(window)} failed SSH logins within "
                         f"{self.window_seconds}s (user {record.meta.get('user', '?')})"

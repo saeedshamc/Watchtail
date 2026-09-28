@@ -13,6 +13,7 @@ class PathScanDetector(Detector):
 
     name = "path_scan"
     interested_kinds = ("http_access",)
+    default_severity = "medium"
 
     def __init__(self, options):
         super().__init__(options)
@@ -46,7 +47,7 @@ class PathScanDetector(Detector):
                 DetectorAlert(
                     detector=self.name,
                     ip=ip,
-                    severity="medium",
+                    severity=self.severity,
                     message=(
                         f"{len(distinct)} distinct paths probed within "
                         f"{self.window_seconds}s (e.g. {sample})"

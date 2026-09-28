@@ -23,9 +23,14 @@ class Detector:
     name = "base"
     # Record kinds this detector wants to see.
     interested_kinds: tuple = ()
+    # Overridable through the config's ``severity`` option.
+    default_severity = "medium"
 
     def __init__(self, options: dict):
         self.options = options or {}
+        self.severity = str(
+            self.options.get("severity") or self.default_severity
+        )
 
     def feed(self, record) -> list:
         """Process one record and return any alerts it triggered."""

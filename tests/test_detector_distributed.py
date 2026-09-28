@@ -72,6 +72,16 @@ def test_window_expiry_drops_old_ips(detector):
     assert alerts == []
 
 
+def test_severity_is_configurable():
+    detector = DistributedAttackDetector(
+        {"enabled": True, "max_ips": 2, "severity": "critical"}
+    )
+    base = dt.datetime(2026, 9, 28, 12, 0, 0)
+    detector.feed(fail("1.1.1.1", ts=base))
+    alerts = detector.feed(fail("2.2.2.2", ts=base))
+    assert alerts[0].severity == "critical"
+
+
 def test_accounts_are_tracked_separately(detector):
     base = dt.datetime(2026, 9, 28, 12, 0, 0)
     detector.feed(fail("1.1.1.1", user="root", ts=base))

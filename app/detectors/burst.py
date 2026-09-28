@@ -12,6 +12,7 @@ class RequestBurstDetector(Detector):
 
     name = "request_burst"
     interested_kinds = ("http_access",)
+    default_severity = "medium"
 
     def __init__(self, options):
         super().__init__(options)
@@ -37,7 +38,7 @@ class RequestBurstDetector(Detector):
                 DetectorAlert(
                     detector=self.name,
                     ip=ip,
-                    severity="medium",
+                    severity=self.severity,
                     message=(
                         f"{len(stamps)} requests within {self.window_seconds}s "
                         f"(last: {record.method} {record.path or '-'})"

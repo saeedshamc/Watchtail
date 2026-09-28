@@ -14,6 +14,7 @@ class DistributedAttackDetector(Detector):
 
     name = "distributed_attack"
     interested_kinds = ("ssh_auth_fail",)
+    default_severity = "high"
 
     def __init__(self, options):
         super().__init__(options)
@@ -57,7 +58,7 @@ class DistributedAttackDetector(Detector):
                 # The campaign has no single source; attribute the alert
                 # to the account so the flagged row reads sensibly.
                 ip=f"user:{user}",
-                severity="high",
+                severity=self.severity,
                 message=(
                     f"{len(distinct)} distinct IPs attacked account "
                     f"{user!r} within {self.window_seconds}s"

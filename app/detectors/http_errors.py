@@ -13,6 +13,7 @@ class HttpErrorSpikeDetector(Detector):
 
     name = "http_error_spike"
     interested_kinds = ("http_access",)
+    default_severity = "medium"
 
     def __init__(self, options):
         super().__init__(options)
@@ -46,7 +47,7 @@ class HttpErrorSpikeDetector(Detector):
                 DetectorAlert(
                     detector=self.name,
                     ip=ip,
-                    severity="medium",
+                    severity=self.severity,
                     message=f"{len(stamps)} error responses within {self.window_seconds}s ({breakdown})",
                     meta={
                         "errors": len(stamps),

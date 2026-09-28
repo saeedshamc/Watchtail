@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Settings · Watchtail{% endblock %}
+{% block content %}
+<section class="card full">
+  <h2>Detector settings
+    {% if config_path %}<span class="muted small">{{ config_path }}</span>
+    {% else %}<span class="muted small">no watchtail.yml — read-only</span>{% endif %}
+  </h2>
+  <p class="muted small">
+    Thresholds apply to running detectors immediately after saving and
+    are written to the config file so they survive restarts.
+  </p>
+
+  <form method="post" action="{{ url_for('settings.save') }}">
+    {% for panel in panels %}
+    <div class="settings-panel">
+      <h3>
+        <label><input type="checkbox" name="{{ panel.name }}.enabled" value="on"
+               {% if panel.enabled %}checked{% endif %}> {{ panel.name }}</label>
+      </h3>
+      <div class="settings-fields">
+        {% for key, kind, label in panel.fields %}
+        <label class="settings-field">
+          <span>{{ label }}</span>
+          {% if kind == 'severity' %}
+          <select name="{{ panel.name }}.{{ key }}">
+            {% for level in severity_levels %}
+            <option value="{{ level }}" {% if panel.options.get(key, '') == level %}selected{% endif %}>{{ level }}</option>
+            {% endfor %}
+          </select>
+          {% elif kind == 'codes' %}
+          <input type="text" name="{{ panel.name }}.{{ key }}"
+                 value="{{ (panel.options.get(key) or []) | join(', ') }}" size="16">
+          {% else %}
+          <input type="number" name="{{ panel.name }}.{{ key }}"
+                 value="{{ panel.options.get(key) }}" min="1" size="8">
+          {% endif %}
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+
+    <div class="settings-panel">
+      <h3>flag review window</h3>
+      <div class="settings-fields">
+        <label class="settings-field">
+          <span>flag_ttl_seconds</span>
+          <input type="number" name="flag_ttl_seconds" value="{{ flag_ttl_seconds }}" min="1" size="8">
+        </label>
+      </div>
+    </div>
+
+    <button type="submit" class="save-button">Save settings</button>
+  </form>
+</section>
+{% endblock %}
