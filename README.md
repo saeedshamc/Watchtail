@@ -16,11 +16,15 @@ config, run one command, open a browser.
 - **Parsers** for nginx and Apache combined access logs, Linux
   `auth.log` (sshd), generic and RFC 5424 syslog, and JSON-lines
   structured logs
-- **Rule-based detection**: failed-SSH-login bursts, 403/404 spikes and
-  request bursts per IP, all with configurable thresholds and windows
+- **Rule-based detection**: failed-SSH-login bursts, 403/404 spikes,
+  request bursts, path scanning, post-failure SSH logins and
+  distributed credential-stuffing campaigns (many IPs against one
+  account) — all with thresholds, windows and severities editable from
+  the settings page
 - **Live dashboard** — server-rendered pages, Chart.js traffic and 4xx
   graphs, event table updating over Socket.IO
-- **Flagged IPs** with one-click review or dismissal
+- **Flagged IPs** with one-click review or dismissal, operator notes
+  and tags for tracking investigations
 - **Webhook alerts** through a pluggable notifier interface
 - **Single admin login**, PBKDF2-hashed password, session-based
 - **SQLite storage** via SQLAlchemy, swappable for PostgreSQL through a
@@ -161,6 +165,7 @@ app/
   realtime.py      Socket.IO broadcaster + periodic stats snapshots
   auth.py          session auth helpers
   parsers/         nginx, apache, auth, syslog, rfc5424, json-lines
+  settings route   detector thresholds UI writing back to config
   detectors/       brute force, 4xx spike, burst, path scan, ssh compromise
   notifiers/       webhook notifier + registry
   routes/          dashboard, events browser, ip detail, sources, reviews, auth, health
