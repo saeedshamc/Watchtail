@@ -66,6 +66,7 @@ def build_notifiers(settings):
                 timeout_seconds=float(email.get("timeout_seconds", 10.0)),
             )
             notifier.min_severity = email.get("min_severity", "low")
+            notifier.digest_enabled = bool(email.get("digest", False))
             notifiers.append(notifier)
         except ValueError:
             pass
@@ -78,6 +79,7 @@ def build_notifiers(settings):
                 timeout_seconds=float(telegram.get("timeout_seconds", 8.0)),
             )
             notifier.min_severity = telegram.get("min_severity", "low")
+            notifier.digest_enabled = bool(telegram.get("digest", False))
             notifiers.append(notifier)
         except ValueError:
             pass

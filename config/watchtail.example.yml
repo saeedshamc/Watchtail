@@ -135,6 +135,10 @@ notifier:
     chat_id: ""
     min_severity: medium
 
+  # Daily digest: set digest: true on a channel (email and/or telegram)
+  # to receive one 24h summary per day at this UTC hour.
+  digest_hour_utc: 7
+
 retention:
   # Trim events and alerts older than this many days on startup.
   max_age_days: 14

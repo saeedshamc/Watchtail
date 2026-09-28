@@ -12,6 +12,7 @@ import logging
 import app as watchtail_app
 from app.database import enable_sqlite_wal
 from app.manager import resync_tailing, set_manager
+from app.notifiers.digest import DigestScheduler
 from app.notifiers.webhook import build_notifiers
 from app.parsers import get_parser
 from app.pipeline import Pipeline, prune_old_rows
@@ -84,6 +85,15 @@ def main():
     socketio.init_app(application)
     start_broadcaster(application, interval_stats=STATS_INTERVAL_SECONDS)
 
+    # Daily digest runs in its own daemon thread; channels opt in via
+    # the digest flag in their notifier block.
+    digest = DigestScheduler(
+        build_notifiers(settings),
+        hour_utc=int(settings.digest_hour_utc),
+        hours=24,
+    )
+    digest.start()
+
     try:
         # allow_unsafe_werkzeug is required for the threading mode dev
         # server; production deployments should use gunicorn with the
@@ -96,6 +106,7 @@ def main():
             allow_unsafe_werkzeug=True,
         )
     finally:
+        digest.stop()
         manager.stop_all()
         set_manager(None)
 

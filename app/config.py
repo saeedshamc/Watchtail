@@ -46,6 +46,7 @@ class Settings:
     webhook_min_severity: str = "low"
     email_config: dict = field(default_factory=dict)
     telegram_config: dict = field(default_factory=dict)
+    digest_hour_utc: int = 7
     retention_max_age_days: int = 14
     config_dir: str = "."
     config_path: str = ""
@@ -117,7 +118,10 @@ def load_config(config_path: Optional[str] = None) -> Settings:
         "chat_id": str(telegram.get("chat_id") or ""),
         "timeout_seconds": float(telegram.get("timeout_seconds", 8.0)),
         "min_severity": str(telegram.get("min_severity", "low")),
+        "digest": bool(telegram.get("digest", False)),
     }
+    settings.email_config["digest"] = bool(email.get("digest", False))
+    settings.digest_hour_utc = int(notifier.get("digest_hour_utc", 7))
 
     retention = raw.get("retention") or {}
     settings.retention_max_age_days = int(retention.get("max_age_days", 14))
