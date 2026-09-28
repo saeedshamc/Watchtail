@@ -415,6 +415,33 @@ h2 a:hover { color: var(--accent); }
   cursor: pointer;
 }
 
+/* --- Respond page ---------------------------------------------------- */
+.respond-command {
+  border: 1px solid var(--panel-edge);
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.6rem;
+}
+.respond-label { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.3rem; }
+.command-box {
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 0.5rem 0.7rem;
+  overflow-x: auto;
+  font-size: 0.8rem;
+}
+.respond-actions form { display: inline; }
+.respond-actions button {
+  background: none;
+  border: 1px solid var(--panel-edge);
+  color: var(--muted);
+  border-radius: 6px;
+  font-size: 0.78rem;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+}
+.respond-actions button:hover { color: var(--text); border-color: var(--muted); }
+
 /* --- Detector settings page ----------------------------------------- */
 .settings-panel {
   border: 1px solid var(--panel-edge);

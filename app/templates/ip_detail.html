@@ -4,6 +4,7 @@
 <section class="card full">
   <h2><code>{{ ip }}</code>
     <span class="badge {{ ip_row.status }}">{{ ip_row.status }}</span>
+    <a href="{{ url_for('respond.index', ip=ip) }}" class="small">respond &rarr;</a>
   </h2>
   <p class="muted small">
     {{ ip_row.alert_count }} alert(s) · first seen {{ ip_row.first_seen_at.strftime('%Y-%m-%d %H:%M UTC') if ip_row.first_seen_at else '?' }}

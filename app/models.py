@@ -143,3 +143,25 @@ class AdminUser(Base):
 
     username: Mapped[str] = mapped_column(String(64), primary_key=True)
     password_hash: Mapped[str] = mapped_column(String(255))
+
+
+class AuditEntry(Base):
+    """Immutable trail of operator/system response actions.
+
+    Every suggestion render and every acknowledged action is recorded
+    so incident reports can answer "who did what, when, on which host".
+    """
+
+    __tablename__ = "audit_log"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    ts: Mapped[dt.datetime] = mapped_column(DateTime, default=utcnow, index=True)
+    actor: Mapped[str] = mapped_column(String(64))  # username or "system"
+    action: Mapped[str] = mapped_column(String(64))  # suggest | ack | note
+    target_ip: Mapped[str] = mapped_column(String(64), index=True)
+    platform: Mapped[str | None] = mapped_column(String(20))
+    command: Mapped[str | None] = mapped_column(Text)
+    detail: Mapped[str | None] = mapped_column(Text)
+
+    def __repr__(self) -> str:  # pragma: no cover - debugging aid
+        return f"<AuditEntry {self.action} {self.target_ip} by {self.actor}>"

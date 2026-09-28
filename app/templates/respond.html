@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Respond · Watchtail{% endblock %}
+{% block content %}
+<section class="card full">
+  <h2>Respond
+    <span class="muted small">suggested firewall commands — review before running</span>
+  </h2>
+
+  <form method="get" class="filter-bar">
+    <input type="text" name="ip" placeholder="ip or user:account" value="{{ ip }}" size="24">
+    <button type="submit">Show commands</button>
+  </form>
+
+  {% if ip %}
+    {% if status %}<p class="muted small">Current review state: <span class="badge {{ status }}">{{ status }}</span></p>
+    {% else %}<p class="muted small">No recorded alerts for {{ ip }} — commands are generic.</p>{% endif %}
+
+    {% for item in commands %}
+    <div class="respond-command">
+      <div class="respond-label">{{ item.label }}</div>
+      <pre class="command-box"><code>{{ item.command }}</code></pre>
+      <div class="respond-actions">
+        <form method="post" action="{{ url_for('respond.acknowledge') }}">
+          <input type="hidden" name="ip" value="{{ ip }}">
+          <input type="hidden" name="platform" value="{{ item.platform }}">
+          <input type="hidden" name="command" value="{{ item.command }}">
+          <button type="submit">Mark applied</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+  <p class="muted">Enter an address above to see suggested firewall commands.</p>
+  {% endif %}
+</section>
+
+<section class="card full">
+  <h2>Audit trail</h2>
+  <table>
+    <thead><tr><th>time (UTC)</th><th>actor</th><th>action</th><th>target</th><th>command / detail</th></tr></thead>
+    <tbody>
+      {% for entry in trail %}
+      <tr>
+        <td>{{ entry.ts.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        <td>{{ entry.actor }}</td>
+        <td><span class="badge {{ 'reviewed' if entry.action == 'ack' else 'ok' }}">{{ entry.action }}</span></td>
+        <td><code>{{ entry.target_ip }}</code></td>
+        <td class="small">{{ entry.command or entry.detail or '' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="muted">No response actions recorded yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
