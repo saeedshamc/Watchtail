@@ -7,6 +7,7 @@ from .jsonl import JsonLinesParser
 from .nginx import NginxAccessParser
 from .syslog import SyslogParser
 from .syslog5424 import Syslog5424Parser
+from .winlog import WinLogParser
 
 _REGISTRY = {
     "nginx": NginxAccessParser,
@@ -15,6 +16,7 @@ _REGISTRY = {
     "syslog": SyslogParser,
     "syslog5424": Syslog5424Parser,
     "json": JsonLinesParser,
+    "winlog": WinLogParser,
 }
 
 

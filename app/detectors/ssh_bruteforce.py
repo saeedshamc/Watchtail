@@ -12,7 +12,7 @@ class SshBruteforceDetector(Detector):
     """
 
     name = "ssh_bruteforce"
-    interested_kinds = ("ssh_auth_fail",)
+    interested_kinds = ("ssh_auth_fail", "win_logon_fail")
     default_severity = "high"
 
     def __init__(self, options):

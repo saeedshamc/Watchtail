@@ -13,7 +13,7 @@ class DistributedAttackDetector(Detector):
     """Fires when an account is hit by too many distinct IPs."""
 
     name = "distributed_attack"
-    interested_kinds = ("ssh_auth_fail",)
+    interested_kinds = ("ssh_auth_fail", "win_logon_fail")
     default_severity = "high"
 
     def __init__(self, options):

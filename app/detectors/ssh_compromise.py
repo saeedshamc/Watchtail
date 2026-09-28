@@ -13,7 +13,9 @@ class SshCompromiseDetector(Detector):
     """Fires when an IP logs in successfully after recent failures."""
 
     name = "ssh_compromise"
-    interested_kinds = ("ssh_auth_fail", "ssh_session_open")
+    interested_kinds = (
+        "ssh_auth_fail", "ssh_session_open", "win_logon_fail", "win_logon_ok"
+    )
 
     def __init__(self, options):
         super().__init__(options)
