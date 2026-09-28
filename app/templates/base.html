@@ -24,6 +24,7 @@
     {% endif %}
   </header>
   <main>
+    <div id="alert-toasts" aria-live="polite"></div>
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <div class="flash full">{{ messages[0] }}</div>

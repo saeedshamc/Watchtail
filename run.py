@@ -17,6 +17,8 @@ from app.pipeline import Pipeline, prune_old_rows
 from app.realtime import emit_activity, socketio, start_broadcaster
 from app.tailer import TailManager
 
+STATS_INTERVAL_SECONDS = 10
+
 
 def build_manager(settings):
     """Create the tail manager wired to the pipeline."""
@@ -77,7 +79,7 @@ def main():
     # Bind the module-level SocketIO instance to this app; without
     # this the server object does not exist and run() fails.
     socketio.init_app(application)
-    start_broadcaster(application)
+    start_broadcaster(application, interval_stats=STATS_INTERVAL_SECONDS)
 
     try:
         # allow_unsafe_werkzeug is required for the threading mode dev

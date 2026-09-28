@@ -30,11 +30,11 @@
       <span class="ip"><a href="{{ url_for('ip_detail.detail', ip=ip.ip) }}"><code>{{ ip.ip }}</code></a></span>
       <span class="badge {{ ip.status }}">{{ ip.status }}</span>
       <span class="reason">{{ ip.reason or '' }} · {{ ip.alert_count }} alerts</span>
-      <form method="post" action="{{ url_for('reviews.update_status', ip=ip.ip) }}">
+      <form method="post" action="{{ url_for('reviews.update_status', ip=ip.ip) }}" class="js-review" data-ip="{{ ip.ip }}">
         <input type="hidden" name="action" value="reviewed">
         <button type="submit" title="Mark as reviewed">review</button>
       </form>
-      <form method="post" action="{{ url_for('reviews.update_status', ip=ip.ip) }}">
+      <form method="post" action="{{ url_for('reviews.update_status', ip=ip.ip) }}" class="js-review" data-ip="{{ ip.ip }}">
         <input type="hidden" name="action" value="dismissed">
         <button type="submit" title="Never flag this IP again">dismiss</button>
       </form>

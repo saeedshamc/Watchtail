@@ -299,3 +299,38 @@ h2 a:hover { color: var(--accent); }
   cursor: pointer;
 }
 .filter-bar a { align-self: center; }
+
+/* --- Live alerts --------------------------------------------------- */
+#alert-toasts {
+  position: fixed;
+  top: 0.9rem;
+  right: 0.9rem;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 340px;
+}
+
+.alert-toast {
+  background: var(--panel);
+  border: 1px solid var(--panel-edge);
+  border-left: 3px solid var(--medium);
+  border-radius: 8px;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.84rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transform: translateX(12px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.alert-toast.visible { opacity: 1; transform: none; }
+.alert-toast.critical { border-left-color: var(--high); }
+.alert-toast.high { border-left-color: var(--high); }
+.alert-toast.low { border-left-color: var(--ok); }
+
+.ip-row.fresh-row { animation: row-flash 1.6s ease-out; }
+@keyframes row-flash {
+  0% { background: rgba(227, 93, 93, 0.22); }
+  100% { background: transparent; }
+}

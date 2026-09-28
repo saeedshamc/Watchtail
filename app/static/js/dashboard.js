@@ -111,12 +111,122 @@
     while (tbody.children.length > MAX_ROWS) tbody.removeChild(tbody.lastChild);
   }
 
+  /* ---- alerts: toasts + flagged list -------------------------------- */
+
+  function showAlertToast(alert) {
+    var host = document.getElementById("alert-toasts");
+    if (!host) return;
+    var toast = document.createElement("div");
+    toast.className = "alert-toast " + (alert.severity || "medium");
+    var strong = document.createElement("strong");
+    strong.textContent = alert.detector + " · " + (alert.ip || "?");
+    var message = document.createElement("div");
+    message.className = "small";
+    message.textContent = alert.message || "";
+    toast.appendChild(strong);
+    toast.appendChild(message);
+    host.appendChild(toast);
+    // Force a reflow so the slide-in animation plays for appended nodes.
+    void toast.offsetWidth;
+    toast.classList.add("visible");
+    setTimeout(function () {
+      toast.classList.remove("visible");
+      setTimeout(function () {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 400);
+    }, 8000);
+  }
+
+  function setStat(id, value) {
+    var el = document.getElementById(id);
+    if (el && el.textContent !== String(value)) el.textContent = String(value);
+  }
+
+  function markFlaggedRowFresh(ip) {
+    var row = document.querySelector('#flagged-list .ip-row[data-ip="' + ip + '"]');
+    if (row) {
+      row.classList.remove("stale-row");
+      return;
+    }
+    var list = document.getElementById("flagged-list");
+    if (!list) return;
+    var placeholder = list.querySelector(".muted");
+    if (placeholder) placeholder.remove();
+
+    var fresh = document.createElement("div");
+    fresh.className = "ip-row fresh-row";
+    fresh.dataset.ip = ip;
+    var name = document.createElement("span");
+    name.className = "ip";
+    var link = document.createElement("a");
+    link.href = "/ips/" + encodeURIComponent(ip);
+    var code = document.createElement("code");
+    code.textContent = ip;
+    link.appendChild(code);
+    name.appendChild(link);
+    var badge = document.createElement("span");
+    badge.className = "badge flagged";
+    badge.textContent = "flagged";
+    var reason = document.createElement("span");
+    reason.className = "reason";
+    reason.textContent = "new alert just received";
+    fresh.appendChild(name);
+    fresh.appendChild(badge);
+    fresh.appendChild(reason);
+    list.insertBefore(fresh, list.firstChild);
+  }
+
+  function applyStatsSnapshot(payload) {
+    var stats = (payload && payload.stats) || {};
+    setStat("stat-events", stats.event_count);
+    setStat("stat-alerts", stats.alert_count);
+    setStat("stat-flagged", stats.flagged_count);
+    if (stats.source_count !== undefined) {
+      setStat(
+        "stat-sources",
+        (stats.active_sources || 0) + "/" + (stats.source_count || 0)
+      );
+    }
+  }
+
   function setSocketState(text, color) {
     var el = document.getElementById("socket-state");
     if (el) {
       el.textContent = text;
       el.style.color = color || "";
     }
+  }
+
+  /* ---- review / dismiss without a page reload ----------------------- */
+
+  function wireReviewForms() {
+    document.addEventListener("submit", function (ev) {
+      var form = ev.target.closest("form.js-review");
+      if (!form) return;
+      ev.preventDefault();
+      var ip = form.dataset.ip;
+      var action = (form.querySelector('input[name="action"]') || {}).value;
+      var row = form.closest(".ip-row");
+      fetch(form.getAttribute("action"), {
+        method: "POST",
+        headers: { "X-Requested-With": "fetch" },
+        body: new URLSearchParams({ action: action || "" }),
+      })
+        .then(function (response) {
+          if (!response.ok) throw new Error("status " + response.status);
+          if (row && row.parentNode) row.parentNode.removeChild(row);
+          var list = document.getElementById("flagged-list");
+          if (list && !list.querySelector(".ip-row") && !list.querySelector(".muted")) {
+            var empty = document.createElement("div");
+            empty.className = "muted small";
+            empty.textContent = "No IPs flagged right now.";
+            list.appendChild(empty);
+          }
+        })
+        .catch(function () {
+          form.submit(); // fall back to the classic round trip
+        });
+    });
   }
 
   function connectSocket() {
@@ -139,9 +249,13 @@
       }
       if (payload.alerts && payload.alerts.length) {
         payload.alerts.forEach(function (alert) {
-          console.info("watchtail alert:", alert.detector, alert.ip, alert.message);
+          showAlertToast(alert);
+          if (alert.ip) markFlaggedRowFresh(alert.ip);
         });
       }
+    });
+    socket.on("stats", function (payload) {
+      applyStatsSnapshot(payload);
     });
   }
 
@@ -152,6 +266,7 @@
       (attrs.chartTraffic || "").split(",").filter(Boolean).map(Number),
       (attrs.chartErrors || "").split(",").filter(Boolean).map(Number)
     );
+    wireReviewForms();
     connectSocket();
   });
 })();
