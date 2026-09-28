@@ -334,3 +334,59 @@ h2 a:hover { color: var(--accent); }
   0% { background: rgba(227, 93, 93, 0.22); }
   100% { background: transparent; }
 }
+
+/* --- Operator notes and tags --------------------------------------- */
+.tag-row { display: inline-flex; gap: 0.3rem; flex-wrap: wrap; }
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(79, 163, 227, 0.12);
+  border: 1px solid rgba(79, 163, 227, 0.35);
+  color: var(--accent);
+  border-radius: 10px;
+  padding: 0.05rem 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.tag-chip.static { display: inline-block; }
+.tag-chip button {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+  line-height: 1;
+  padding: 0;
+}
+.tag-chip button:hover { color: var(--high); }
+
+.annotate-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  max-width: 560px;
+}
+.annotate-form input,
+.annotate-form textarea {
+  padding: 0.45rem 0.6rem;
+  background: var(--bg);
+  border: 1px solid var(--panel-edge);
+  border-radius: 7px;
+  color: var(--text);
+  font-size: 0.84rem;
+  font-family: inherit;
+  resize: vertical;
+}
+.annotate-form button {
+  align-self: flex-start;
+  padding: 0.4rem 0.9rem;
+  background: var(--accent);
+  border: none;
+  border-radius: 7px;
+  color: #0b1016;
+  font-weight: 600;
+  cursor: pointer;
+}

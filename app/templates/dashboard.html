@@ -30,6 +30,12 @@
       <span class="ip"><a href="{{ url_for('ip_detail.detail', ip=ip.ip) }}"><code>{{ ip.ip }}</code></a></span>
       <span class="badge {{ ip.status }}">{{ ip.status }}</span>
       <span class="reason">{{ ip.reason or '' }} · {{ ip.alert_count }} alerts</span>
+      {% if ip.tags %}
+      <span class="tag-row">
+        {% for tag in ip.tags %}<span class="tag-chip static"><span>{{ tag }}</span></span>{% endfor %}
+      </span>
+      {% endif %}
+      {% if ip.operator_note %}<span class="reason" title="{{ ip.operator_note }}">&ldquo;{{ ip.operator_note|truncate(60) }}&rdquo;</span>{% endif %}
       <form method="post" action="{{ url_for('reviews.update_status', ip=ip.ip) }}" class="js-review" data-ip="{{ ip.ip }}">
         <input type="hidden" name="action" value="reviewed">
         <button type="submit" title="Mark as reviewed">review</button>

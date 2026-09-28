@@ -26,6 +26,29 @@
 </section>
 
 <section class="card full">
+  <h2>Operator notes &amp; tags</h2>
+  {% if ip_row.tags %}
+  <div class="tag-row">
+    {% for tag in ip_row.tags %}
+    <form method="post" action="{{ url_for('annotations.remove_tag', ip=ip) }}" class="tag-chip">
+      <input type="hidden" name="tag" value="{{ tag }}">
+      <span>{{ tag }}</span>
+      <button type="submit" title="Remove tag" aria-label="Remove tag {{ tag }}">&times;</button>
+    </form>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="muted small">No tags yet.</p>
+  {% endif %}
+  <form method="post" action="{{ url_for('annotations.annotate', ip=ip) }}" class="annotate-form">
+    <input type="text" name="tags" placeholder="tags, comma separated (e.g. false-positive, watchlist)"
+           value="{{ ip_row.tags | join(', ') }}" size="44">
+    <textarea name="note" rows="3" placeholder="Investigation note (who confirmed what, ticket number...)" maxlength="2000">{{ ip_row.operator_note or '' }}</textarea>
+    <button type="submit">Save annotation</button>
+  </form>
+</section>
+
+<section class="card full">
   <h2>Alerts</h2>
   <table>
     <thead><tr><th>time (UTC)</th><th>detector</th><th>severity</th><th>message</th></tr></thead>

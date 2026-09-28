@@ -28,6 +28,8 @@ def flagged_api():
                     "last_alert_at": row.last_alert_at.isoformat() + "Z"
                     if row.last_alert_at
                     else None,
+                    "tags": list(row.tags or []),
+                    "operator_note": row.operator_note,
                 }
                 for row in rows
             ]

@@ -38,6 +38,8 @@ def detail(ip):
         alert_count = ip_row.alert_count
         first_seen_at = ip_row.first_seen_at
         last_alert_at = ip_row.last_alert_at
+        operator_note = ip_row.operator_note
+        tags = list(ip_row.tags or [])
 
     return render_template(
         "ip_detail.html",
@@ -47,6 +49,8 @@ def detail(ip):
             "alert_count": alert_count,
             "first_seen_at": first_seen_at,
             "last_alert_at": last_alert_at,
+            "operator_note": operator_note,
+            "tags": tags,
         },
         alerts=alerts,
         events=events,

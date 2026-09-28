@@ -2,6 +2,7 @@
 
 
 def register_blueprints(app):
+    from .annotations import bp as annotations_bp
     from .auth import bp as auth_bp
     from .dashboard import bp as dashboard_bp
     from .events import bp as events_bp
@@ -16,4 +17,5 @@ def register_blueprints(app):
     app.register_blueprint(events_bp)
     app.register_blueprint(sources_bp)
     app.register_blueprint(reviews_bp)
+    app.register_blueprint(annotations_bp)
     app.register_blueprint(ip_detail_bp)
