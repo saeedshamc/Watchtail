@@ -50,6 +50,14 @@ def create_app(config_path=None, database_url=None):
         or settings.database_url
         or default_database_url()
     )
+    app.config.update(
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE="Lax",
+        # None means "Secure only over HTTPS": browsers served over plain
+        # HTTP (LAN deployments) still get the session cookie, while TLS
+        # deployments automatically get the Secure flag.
+        SESSION_COOKIE_SECURE=None,
+    )
 
     configure_engine(app.config["SQLALCHEMY_DATABASE_URI"])
     create_all()
@@ -61,8 +69,38 @@ def create_app(config_path=None, database_url=None):
     from .routes import register_blueprints
 
     register_blueprints(app)
+    _register_security_headers(app)
 
     return app
+
+
+def _register_security_headers(app):
+    """Attach defensive response headers to every response.
+
+    The CSP keeps the dashboard's own assets and the two CDNs used as
+    fallback when vendored Chart.js/socket.io files are missing; the
+    dashboard needs inline handlers for that fallback, hence
+    'unsafe-inline' in script-src.
+    """
+
+    @app.after_request
+    def set_security_headers(response):
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "no-referrer")
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net "
+            "https://cdn.socket.io; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data:; "
+            "connect-src 'self'; "
+            "frame-ancestors 'none'; "
+            "base-uri 'self'; "
+            "form-action 'self'",
+        )
+        return response
 
 
 def _ensure_secret_key_file(app):
