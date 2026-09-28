@@ -85,6 +85,15 @@ detectors:
     window_seconds: 60
     status_codes: [404, 403]
 
+  # Coordinated campaign: an account hit by N distinct IPs within X
+  # seconds (credential stuffing, botnet brute force). The alert is
+  # attributed to 'user:<name>' since there is no single source IP.
+  distributed_attack:
+    enabled: true
+    max_ips: 5
+    window_seconds: 600
+    cooldown_seconds: 300
+
   # How long a flagged IP stays flagged after the last alert.
   flag_ttl_seconds: 900
 

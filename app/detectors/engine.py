@@ -5,6 +5,7 @@ import threading
 
 from .base import Detector, DetectorAlert
 from .burst import RequestBurstDetector
+from .distributed import DistributedAttackDetector
 from .http_errors import HttpErrorSpikeDetector
 from .path_scan import PathScanDetector
 from .ssh_bruteforce import SshBruteforceDetector
@@ -18,6 +19,7 @@ DETECTOR_CLASSES = {
     RequestBurstDetector.name: RequestBurstDetector,
     SshCompromiseDetector.name: SshCompromiseDetector,
     PathScanDetector.name: PathScanDetector,
+    DistributedAttackDetector.name: DistributedAttackDetector,
 }
 
 
