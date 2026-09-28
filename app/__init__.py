@@ -24,6 +24,16 @@ def default_database_url() -> str:
     return "sqlite:///data/watchtail.db"
 
 
+def resolve_database_url(settings, database_url=None):
+    """Database URL precedence shared by the app and the CLI."""
+    return (
+        database_url
+        or os.environ.get("WATCHTAIL_DATABASE_URL")
+        or settings.database_url
+        or default_database_url()
+    )
+
+
 def create_app(config_path=None, database_url=None):
     """Build the Flask app.
 
@@ -44,12 +54,7 @@ def create_app(config_path=None, database_url=None):
         "WATCHTAIL_SECRET_KEY", ""
     ) or secrets.token_hex(32)
     app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(hours=12)
-    app.config["SQLALCHEMY_DATABASE_URI"] = (
-        database_url
-        or os.environ.get("WATCHTAIL_DATABASE_URL")
-        or settings.database_url
-        or default_database_url()
-    )
+    app.config["SQLALCHEMY_DATABASE_URI"] = resolve_database_url(settings, database_url)
     app.config.update(
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
