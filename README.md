@@ -23,6 +23,22 @@ config, run one command, open a browser.
   page
 - **Threat scoring** with time decay, surfacing the highest-risk IPs
   first on a dedicated dashboard panel
+- **Baseline anomalies** — the engine learns each hour's normal volume
+  per event kind and each source's heartbeat, flagging suspicious
+  spikes *and* suspicious silence (a log that stops is a finding)
+- **Suppressions with expiry** for expected noise (nightly deploys,
+  allowed scanners) that never rewrite history
+- **Playbooks** — small YAML if/then automations (tag, escalate,
+  suppress, audit) applied to every fired alert
+- **Response workflow**: ready-to-review firewall commands for six
+  platforms with an immutable audit trail (watchtail never touches
+  the firewall itself)
+- **Two-factor login** (TOTP, standard library implementation) and
+  **admin/viewer roles** for multi-operator deployments
+- **Integrations**: Prometheus `/metrics`, a token-authenticated REST
+  API and an inbound webhook so other tools can feed alerts in;
+  winlogbeat JSON brings Windows hosts under the same detectors
+- **Bilingual UI** — English and Persian (فارسی) with one click
 - **Threat intel**: local blocklists (FireHOL netsets, AbuseIPDB CSV)
   flag known-bad addresses as critical on first sight; optional
   offline GeoIP country enrichment
@@ -176,7 +192,12 @@ app/
   pipeline.py      tailer -> persistence -> detection -> notifier
   realtime.py      Socket.IO broadcaster + periodic stats snapshots
   auth.py          session auth helpers
-  parsers/         nginx, apache, auth, syslog, rfc5424, json-lines
+  parsers/         nginx, apache, auth, syslog, rfc5424, json-lines, winlog
+  anomaly.py       baseline learning + spike/silence checks
+  suppression.py   expiring alert silences
+  playbooks.py     yaml alert automations
+  attack_map.py    MITRE ATT&CK mapping
+  totp.py          stdlib two-factor codes
   settings route   detector thresholds UI writing back to config
   detectors/       brute force, 4xx spike, burst, path scan, ssh compromise
   notifiers/       webhook notifier + registry
