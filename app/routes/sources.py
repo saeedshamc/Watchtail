@@ -6,6 +6,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from ..auth import login_required
 from ..database import session_scope
+from ..manager import resync_tailing
 from ..models import LogSource
 from ..parsers import known_types
 
@@ -53,6 +54,7 @@ def add():
             )
         )
     flash(f"Source {path} added.")
+    resync_tailing()  # start tailing immediately, not on next restart
     return redirect(url_for("sources.manage"))
 
 
@@ -66,6 +68,7 @@ def toggle(source_id):
             flash(
                 f"Source {source.path} {'resumed' if source.enabled else 'paused'}."
             )
+    resync_tailing()
     return redirect(url_for("sources.manage"))
 
 
@@ -77,5 +80,6 @@ def delete(source_id):
         if source is not None:
             path = source.path
             session.delete(source)
-            flash(f"Source {path} removed.")
+        flash(f"Source {path} removed.")
+    resync_tailing()  # stop the worker for the removed path
     return redirect(url_for("sources.manage"))

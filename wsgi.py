@@ -10,6 +10,7 @@ import logging
 
 import app as watchtail_app
 from app.database import session_scope
+from app.manager import set_manager
 from app.models import LogSource
 from app.notifiers.webhook import build_notifiers
 from app.parsers import get_parser
@@ -49,6 +50,7 @@ def _start_tailers():
         poll_interval=1.0,
         persist_position=persist_position,
     )
+    set_manager(manager)
     with session_scope() as session:
         sources = session.query(LogSource).all()
     manager.sync(sources)

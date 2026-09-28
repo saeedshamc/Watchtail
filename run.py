@@ -11,6 +11,7 @@ import logging
 
 import app as watchtail_app
 from app.database import enable_sqlite_wal
+from app.manager import resync_tailing, set_manager
 from app.notifiers.webhook import build_notifiers
 from app.parsers import get_parser
 from app.pipeline import Pipeline, prune_old_rows
@@ -37,12 +38,14 @@ def build_manager(settings):
             if source is not None:
                 source.last_position = position
 
-    return TailManager(
+    manager = TailManager(
         parser_factory=get_parser,
         on_record=pipeline.handle_record,
         poll_interval=1.0,
         persist_position=persist_position,
     )
+    set_manager(manager)
+    return manager
 
 
 def main():
@@ -94,6 +97,7 @@ def main():
         )
     finally:
         manager.stop_all()
+        set_manager(None)
 
 
 if __name__ == "__main__":
