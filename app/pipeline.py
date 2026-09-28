@@ -13,6 +13,7 @@ from .detectors import DetectionEngine
 from .models import Alert, Event, IpStatus
 from .models import utcnow
 from .scoring import apply_alert
+from . import threatintel
 
 logger = logging.getLogger("watchtail")
 
@@ -39,6 +40,22 @@ class Pipeline:
 
         event_row = self._persist_event(record, raw, source)
         alerts = self.engine.feed(record)
+        # Known-bad addresses from local blocklists flag instantly,
+        # before any behavioural threshold would catch them.
+        if record.ip and not alerts:
+            blocklist = threatintel.get_store().lookup(record.ip)
+            if blocklist:
+                from .detectors.base import DetectorAlert
+
+                alerts = [
+                    DetectorAlert(
+                        detector="threat_intel",
+                        ip=record.ip,
+                        severity="critical",
+                        message=f"activity from known-bad address (blocklist: {blocklist})",
+                        meta={"blocklist": blocklist},
+                    )
+                ]
         alert_rows = [self._persist_alert(alert) for alert in alerts]
 
         flagged = False

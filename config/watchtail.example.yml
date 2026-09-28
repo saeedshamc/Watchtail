@@ -142,3 +142,14 @@ notifier:
 retention:
   # Trim events and alerts older than this many days on startup.
   max_age_days: 14
+
+threat_intel:
+  # Local blocklists: activity from any listed address flags as
+  # critical instantly, before behavioural thresholds are reached.
+  # Plain text (one IP or CIDR per line) and AbuseIPDB-style CSV both
+  # work; FireHOL netsets are plain text.
+  blocklists: []
+  #  - name: firehol-level1
+  #    path: /etc/watchtail/firehol_level1.netset
+  #  - name: abuseipdb-export
+  #    path: /etc/watchtail/abuseipdb.csv
