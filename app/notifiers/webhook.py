@@ -8,11 +8,12 @@ from .base import Notifier
 class WebhookNotifier(Notifier):
     name = "webhook"
 
-    def __init__(self, url, timeout_seconds=5.0):
+    def __init__(self, url, timeout_seconds=5.0, min_severity="low"):
         if not url:
             raise ValueError("webhook url is empty")
         self.url = url
         self.timeout_seconds = timeout_seconds
+        self.min_severity = min_severity
 
     def send(self, alert) -> None:
         payload = {
@@ -33,17 +34,52 @@ def build_notifiers(settings):
     """Create every notifier the settings enable.
 
     Returns an empty registry when nothing is configured; a webhook
-    with a blank URL simply stays off.
+    with a blank URL simply stays off. Each channel gets its own
+    minimum severity from the config's ``min_severity`` key.
     """
     from .base import NotifierRegistry
+    from .email import EmailNotifier
+    from .telegram import TelegramNotifier
 
     notifiers = []
-    url = settings.webhook_url
-    if url:
+
+    if settings.webhook_url:
         try:
             notifiers.append(
-                WebhookNotifier(url, settings.webhook_timeout_seconds)
+                WebhookNotifier(
+                    settings.webhook_url,
+                    settings.webhook_timeout_seconds,
+                    min_severity=settings.webhook_min_severity,
+                )
             )
         except ValueError:
             pass
+
+    email = getattr(settings, "email_config", None) or {}
+    if email.get("host") and email.get("to"):
+        try:
+            notifier = EmailNotifier(
+                email.get("host"), email.get("port", 587),
+                email.get("username"), email.get("password"),
+                email.get("from"), email.get("to"),
+                use_tls=email.get("use_tls", True),
+                timeout_seconds=float(email.get("timeout_seconds", 10.0)),
+            )
+            notifier.min_severity = email.get("min_severity", "low")
+            notifiers.append(notifier)
+        except ValueError:
+            pass
+
+    telegram = getattr(settings, "telegram_config", None) or {}
+    if telegram.get("bot_token") and telegram.get("chat_id"):
+        try:
+            notifier = TelegramNotifier(
+                telegram["bot_token"], telegram["chat_id"],
+                timeout_seconds=float(telegram.get("timeout_seconds", 8.0)),
+            )
+            notifier.min_severity = telegram.get("min_severity", "low")
+            notifiers.append(notifier)
+        except ValueError:
+            pass
+
     return NotifierRegistry(notifiers)

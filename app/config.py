@@ -43,6 +43,9 @@ class Settings:
     detectors: dict = field(default_factory=dict)
     webhook_url: str = ""
     webhook_timeout_seconds: float = 5.0
+    webhook_min_severity: str = "low"
+    email_config: dict = field(default_factory=dict)
+    telegram_config: dict = field(default_factory=dict)
     retention_max_age_days: int = 14
     config_dir: str = "."
     config_path: str = ""
@@ -93,6 +96,28 @@ def load_config(config_path: Optional[str] = None) -> Settings:
     webhook = notifier.get("webhook") or {}
     settings.webhook_url = str(webhook.get("url") or "")
     settings.webhook_timeout_seconds = float(webhook.get("timeout_seconds", 5.0))
+    settings.webhook_min_severity = str(webhook.get("min_severity", "low"))
+
+    email = notifier.get("email") or {}
+    settings.email_config = {
+        "host": str(email.get("host") or ""),
+        "port": int(email.get("port", 587)),
+        "username": email.get("username"),
+        "password": email.get("password"),
+        "from": str(email.get("from") or "watchtail@localhost"),
+        "to": [str(a) for a in (email.get("to") or [])],
+        "use_tls": bool(email.get("use_tls", True)),
+        "timeout_seconds": float(email.get("timeout_seconds", 10.0)),
+        "min_severity": str(email.get("min_severity", "low")),
+    }
+
+    telegram = notifier.get("telegram") or {}
+    settings.telegram_config = {
+        "bot_token": str(telegram.get("bot_token") or ""),
+        "chat_id": str(telegram.get("chat_id") or ""),
+        "timeout_seconds": float(telegram.get("timeout_seconds", 8.0)),
+        "min_severity": str(telegram.get("min_severity", "low")),
+    }
 
     retention = raw.get("retention") or {}
     settings.retention_max_age_days = int(retention.get("max_age_days", 14))

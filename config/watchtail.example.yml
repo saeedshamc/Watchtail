@@ -112,6 +112,28 @@ notifier:
   webhook:
     url: ""
     timeout_seconds: 5
+    # Only send alerts at or above this severity to this channel.
+    min_severity: low
+
+  # Email over SMTP with STARTTLS. Leave host empty to disable.
+  # password: prefer WATCHTAIL_EMAIL_PASSWORD in the environment later;
+  # for now keep the config file outside source control.
+  email:
+    host: ""
+    port: 587
+    username: ""
+    password: ""
+    from: watchtail@example.test
+    to: []            # e.g. ["ops@example.test", "soc@example.test"]
+    use_tls: true
+    min_severity: high
+
+  # Telegram bot alerts: create a bot with @BotFather, then put its
+  # token here and your chat id (get it from @userinfobot).
+  telegram:
+    bot_token: ""
+    chat_id: ""
+    min_severity: medium
 
 retention:
   # Trim events and alerts older than this many days on startup.
