@@ -59,7 +59,15 @@
         <td>{{ alert.ts.strftime('%Y-%m-%d %H:%M:%S') }}</td>
         <td><span class="badge {{ alert.severity }}">{{ alert.detector }}</span></td>
         <td>{{ alert.severity }}</td>
-        <td class="small">{{ alert.message }}</td>
+        <td class="small">
+          {{ alert.message }}
+          {% set mitre = attack_map.for_detector(alert.detector) %}
+          {% if mitre %}
+          <span class="mitre" title="{{ mitre.tactic }} ({{ mitre.tactic_id }})">
+            MITRE {{ mitre.technique_id }} — {{ mitre.technique }}
+          </span>
+          {% endif %}
+        </td>
       </tr>
       {% else %}
       <tr><td colspan="4" class="muted">No alerts recorded.</td></tr>

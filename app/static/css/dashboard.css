@@ -415,6 +415,17 @@ h2 a:hover { color: var(--accent); }
   cursor: pointer;
 }
 
+/* --- MITRE ATT&CK labels --------------------------------------------- */
+.mitre {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.4rem;
+  background: rgba(138, 148, 163, 0.14);
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
 /* --- Respond page ---------------------------------------------------- */
 .respond-command {
   border: 1px solid var(--panel-edge);

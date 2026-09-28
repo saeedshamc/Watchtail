@@ -4,6 +4,7 @@ import datetime as dt
 
 from flask import Blueprint, abort, render_template
 
+from ..attack_map import for_detector
 from ..auth import login_required
 from ..database import session_scope
 from ..models import Alert, Event, IpStatus, utcnow
@@ -51,6 +52,7 @@ def detail(ip):
     return render_template(
         "ip_detail.html",
         ip=ip,
+        attack_map=type("M", (), {"for_detector": staticmethod(for_detector)}),
         ip_row={
             "status": status,
             "alert_count": alert_count,

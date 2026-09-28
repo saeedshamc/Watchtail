@@ -37,7 +37,9 @@ def _serialize_ip(row):
 
 
 def _serialize_alert(row):
-    return {
+    from ..attack_map import describe
+
+    data = {
         "id": row.id,
         "ts": row.ts.isoformat() + "Z",
         "detector": row.detector,
@@ -46,6 +48,10 @@ def _serialize_alert(row):
         "message": row.message,
         "meta": row.meta or {},
     }
+    attack = describe(row.detector)
+    if attack:
+        data["mitre"] = attack
+    return data
 
 
 @bp.get("/ips")
