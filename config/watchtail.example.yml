@@ -94,6 +94,16 @@ detectors:
     window_seconds: 600
     cooldown_seconds: 300
 
+  # Composite signal: an IP tripping N *distinct* detectors within X
+  # seconds is more suspicious than any single rule — fire one
+  # critical alert bundling the evidence.
+  correlation:
+    enabled: true
+    min_signals: 2
+    window_seconds: 900
+    cooldown_seconds: 900
+    severity: critical
+
   # How long a flagged IP stays flagged after the last alert.
   flag_ttl_seconds: 900
 

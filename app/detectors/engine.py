@@ -5,6 +5,7 @@ import threading
 
 from .base import Detector, DetectorAlert
 from .burst import RequestBurstDetector
+from .correlation import CorrelationDetector
 from .distributed import DistributedAttackDetector
 from .http_errors import HttpErrorSpikeDetector
 from .path_scan import PathScanDetector
@@ -20,6 +21,7 @@ DETECTOR_CLASSES = {
     SshCompromiseDetector.name: SshCompromiseDetector,
     PathScanDetector.name: PathScanDetector,
     DistributedAttackDetector.name: DistributedAttackDetector,
+    CorrelationDetector.name: CorrelationDetector,
 }
 
 
@@ -56,7 +58,26 @@ class DetectionEngine:
                     alerts.extend(detector.feed(record))
                 except Exception:
                     logger.exception("detector %s failed on record", detector.name)
+            # Correlation runs on the outputs of the other detectors,
+            # not on raw records.
+            correlator = self._find(CorrelationDetector)
+            if correlator is not None:
+                for alert in list(alerts):
+                    try:
+                        alerts.extend(
+                            correlator.observe_alert(
+                                record.ts.timestamp(), alert.ip, alert.detector
+                            )
+                        )
+                    except Exception:
+                        logger.exception("correlator failed")
         return alerts
+
+    def _find(self, cls):
+        for detector in self.detectors:
+            if isinstance(detector, cls):
+                return detector
+        return None
 
     def detector_names(self) -> list[str]:
         return [d.name for d in self.detectors]
