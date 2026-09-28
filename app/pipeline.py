@@ -14,6 +14,7 @@ from .models import Alert, Event, IpStatus
 from .models import utcnow
 from .scoring import apply_alert
 from . import threatintel
+from .anomaly import BaselineEngine
 
 logger = logging.getLogger("watchtail")
 
@@ -25,6 +26,8 @@ class Pipeline:
         ``notifier_registry`` is an object with ``dispatch(alert_row)``
         (the NotifierRegistry from app.notifiers); ``emit`` is an async
         callback invoked with (event_dict, alerts) for live dashboards.
+        The baseline engine learns normal traffic as a side effect of
+        every ingested record.
         """
         self.settings = settings
         self.emit = emit
@@ -32,6 +35,7 @@ class Pipeline:
             settings, on_alert=None,
         )
         self.notifiers = notifier_registry
+        self.baseline = BaselineEngine()
 
     def handle_record(self, record, raw, source):
         """Process one parsed record from a tail worker."""
@@ -39,6 +43,10 @@ class Pipeline:
             return
 
         event_row = self._persist_event(record, raw, source)
+        # Baseline learning must see every record, even unparsed ones.
+        self.baseline.observe(
+            record.kind, record.ts, source.id if source is not None else None
+        )
         alerts = self.engine.feed(record)
         # Known-bad addresses from local blocklists flag instantly,
         # before any behavioural threshold would catch them.
