@@ -41,6 +41,7 @@ class Settings:
     database_url: str = "sqlite:///data/watchtail.db"
     sources: list = field(default_factory=list)
     detectors: dict = field(default_factory=dict)
+    custom_detectors: list = field(default_factory=list)
     webhook_url: str = ""
     webhook_timeout_seconds: float = 5.0
     webhook_min_severity: str = "low"
@@ -96,6 +97,9 @@ def load_config(config_path: Optional[str] = None) -> Settings:
 
     settings.sources = _parse_sources(raw.get("sources") or [], settings.config_dir)
     settings.detectors = dict(raw.get("detectors") or {})
+    settings.custom_detectors = [
+        entry for entry in (raw.get("custom_detectors") or []) if isinstance(entry, dict)
+    ]
 
     notifier = raw.get("notifier") or {}
     webhook = notifier.get("webhook") or {}

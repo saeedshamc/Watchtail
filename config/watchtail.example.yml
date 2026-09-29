@@ -107,6 +107,26 @@ detectors:
   # How long a flagged IP stays flagged after the last alert.
   flag_ttl_seconds: 900
 
+# Site-specific rules without writing Python. Each rule fires when one
+# IP accumulates `threshold` records that match ALL `conditions` within
+# `window_seconds`. `match` is exact, contains or regex; `field` may be
+# a parsed field (path, status, method, user_agent, ip) or a dotted
+# path into meta (meta.user).
+custom_detectors: []
+#  - name: wp_login_probe
+#    description: WordPress admin probing
+#    severity: high
+#    threshold: 10
+#    window_seconds: 300
+#    cooldown_seconds: 600
+#    conditions:
+#      - field: path
+#        value: /wp-login.php
+#        match: contains
+#      - field: status
+#        value: "404"
+#        match: exact
+
 notifier:
   # POSTs a JSON summary for every alert. Leave url empty to disable.
   webhook:

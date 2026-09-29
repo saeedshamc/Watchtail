@@ -4,6 +4,7 @@ import logging
 import threading
 
 from .base import Detector, DetectorAlert
+from .custom import build_custom_detectors
 from .burst import RequestBurstDetector
 from .correlation import CorrelationDetector
 from .distributed import DistributedAttackDetector
@@ -44,6 +45,8 @@ class DetectionEngine:
                 self.detectors.append(cls(options))
             except Exception:
                 logger.exception("could not initialise detector %s", name)
+        for detector in build_custom_detectors(settings):
+            self.detectors.append(detector)
 
     def feed(self, record) -> list:
         """Feed one record; returns alerts fired by this record."""
@@ -52,7 +55,10 @@ class DetectionEngine:
         alerts: list[DetectorAlert] = []
         with self._lock:
             for detector in self.detectors:
-                if record.kind not in detector.interested_kinds:
+                # interested_kinds None means "every kind": custom rules
+                # filter on field conditions instead.
+                kinds = detector.interested_kinds
+                if kinds is not None and record.kind not in kinds:
                     continue
                 try:
                     alerts.extend(detector.feed(record))
