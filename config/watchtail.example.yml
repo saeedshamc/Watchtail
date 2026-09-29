@@ -143,6 +143,16 @@ retention:
   # Trim events and alerts older than this many days on startup.
   max_age_days: 14
 
+# Global request rate limiting for the web UI and API. Requests are
+# counted per client IP in a sliding window; /health and /metrics are
+# always exempt. Limiting is per process, not cluster-wide.
+rate_limit:
+  enabled: true
+  max_requests: 300
+  window_seconds: 60
+  # Extra path prefixes that never count against the limit.
+  exempt_prefixes: []
+
 threat_intel:
   # Local blocklists: activity from any listed address flags as
   # critical instantly, before behavioural thresholds are reached.

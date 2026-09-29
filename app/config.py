@@ -51,6 +51,7 @@ class Settings:
     geoip_mmdb: str = ""
     playbooks: list = field(default_factory=list)
     retention_max_age_days: int = 14
+    rate_limit: dict = field(default_factory=dict)
     config_dir: str = "."
     config_path: str = ""
 
@@ -128,6 +129,14 @@ def load_config(config_path: Optional[str] = None) -> Settings:
 
     retention = raw.get("retention") or {}
     settings.retention_max_age_days = int(retention.get("max_age_days", 14))
+
+    rl = raw.get("rate_limit") or {}
+    settings.rate_limit = {
+        "enabled": bool(rl.get("enabled", True)),
+        "max_requests": int(rl.get("max_requests", 300)),
+        "window_seconds": float(rl.get("window_seconds", 60)),
+        "exempt_prefixes": [str(p) for p in (rl.get("exempt_prefixes") or [])],
+    }
 
     settings.threatintel = {
         "blocklists": list((raw.get("threat_intel") or {}).get("blocklists") or [])

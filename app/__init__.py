@@ -86,6 +86,7 @@ def create_app(config_path=None, database_url=None):
     from .routes import register_blueprints
 
     register_blueprints(app)
+    _register_rate_limiter(app)
     _register_security_headers(app)
 
     from . import i18n
@@ -95,6 +96,13 @@ def create_app(config_path=None, database_url=None):
         return {"tr": i18n.tr, "current_lang": i18n.current_language}
 
     return app
+
+
+def _register_rate_limiter(app):
+    """Install the global per-IP rate limiter (see app.ratelimit)."""
+    from . import ratelimit
+
+    ratelimit.install(app)
 
 
 def _register_security_headers(app):
