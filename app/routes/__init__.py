@@ -5,6 +5,7 @@ def register_blueprints(app):
     from .api_v1 import bp as api_v1_bp
     from .annotations import bp as annotations_bp
     from .auth import bp as auth_bp
+    from .cases import bp as cases_bp
     from .dashboard import bp as dashboard_bp
     from .events import bp as events_bp
     from .health import bp as health_bp
@@ -27,6 +28,7 @@ def register_blueprints(app):
     app.register_blueprint(annotations_bp)
     app.register_blueprint(settings_bp)
     app.register_blueprint(suppressions_bp)
+    app.register_blueprint(cases_bp)
     app.register_blueprint(respond_bp)
     app.register_blueprint(ip_detail_bp)
     app.register_blueprint(api_v1_bp)

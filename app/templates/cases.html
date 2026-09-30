@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Cases · Watchtail{% endblock %}
+{% block content %}
+<section class="card full">
+  <h2>Incident cases
+    <span class="muted small">{{ open_count }} open</span>
+  </h2>
+
+  <p class="filter-bar">
+    <a href="{{ url_for('cases.index', status='open') }}" {% if status_filter == 'open' %}class="badge ok"{% endif %}>open</a>
+    <a href="{{ url_for('cases.index', status='closed') }}" {% if status_filter == 'closed' %}class="badge dismissed"{% endif %}>closed</a>
+    <a href="{{ url_for('cases.index', status='all') }}" {% if status_filter == 'all' %}class="badge"{% endif %}>all</a>
+  </p>
+
+  <table>
+    <thead><tr><th>#</th><th>title</th><th>severity</th><th>status</th><th>entries</th><th>by</th><th>updated (UTC)</th></tr></thead>
+    <tbody>
+      {% for case, entry_count in cases %}
+      <tr>
+        <td><a href="{{ url_for('cases.detail', case_id=case.id) }}">#{{ case.id }}</a></td>
+        <td><a href="{{ url_for('cases.detail', case_id=case.id) }}">{{ case.title }}</a></td>
+        <td><span class="badge {{ 'critical' if case.severity == 'critical' else ('warn' if case.severity in ('high', 'medium') else 'ok') }}">{{ case.severity }}</span></td>
+        <td>
+          {% if case.is_open() %}
+          <span class="badge warn">{{ case.status }}</span>
+          {% else %}
+          <span class="badge dismissed">closed</span>
+          {% endif %}
+        </td>
+        <td class="num">{{ entry_count }}</td>
+        <td>{{ case.created_by }}</td>
+        <td>{{ case.updated_at }}Z</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7" class="muted">No cases with this filter yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2 style="margin-top:1.4rem">Open a case</h2>
+  <form class="filter-bar" method="post" action="{{ url_for('cases.add') }}">
+    <input type="text" name="title" placeholder="title (e.g. SSH campaign on web-01)" size="34" required>
+    <select name="severity">
+      <option value="low">low</option>
+      <option value="medium" selected>medium</option>
+      <option value="high">high</option>
+      <option value="critical">critical</option>
+    </select>
+    <input type="text" name="description" placeholder="short description" size="40">
+    <button type="submit">Open case</button>
+  </form>
+</section>
+{% endblock %}

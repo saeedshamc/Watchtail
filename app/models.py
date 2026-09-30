@@ -174,6 +174,67 @@ class AuditEntry(Base):
         return f"<AuditEntry {self.action} {self.target_ip} by {self.actor}>"
 
 
+class Case(Base):
+    """An operator-owned investigation bundling alerts and notes.
+
+    Cases are the human side of detection: an analyst groups related
+    alerts under one case, records findings on its timeline and closes
+    it when resolved. ``status`` is ``open``, ``closed`` or ``reopened``
+    (reopened keeps history and flips back to open semantics).
+    """
+
+    __tablename__ = "cases"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    title: Mapped[str] = mapped_column(String(200))
+    description: Mapped[str] = mapped_column(Text, default="")
+    status: Mapped[str] = mapped_column(String(16), default="open", index=True)
+    severity: Mapped[str] = mapped_column(String(16), default="medium")
+    created_by: Mapped[str] = mapped_column(String(64), default="system")
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime, default=utcnow)
+    updated_at: Mapped[dt.datetime] = mapped_column(DateTime, default=utcnow)
+    closed_at: Mapped[dt.datetime | None] = mapped_column(DateTime)
+
+    entries: Mapped[list["CaseEntry"]] = relationship(
+        back_populates="case", cascade="all, delete-orphan"
+    )
+
+    def is_open(self) -> bool:
+        return self.status in ("open", "reopened")
+
+    def __repr__(self) -> str:  # pragma: no cover - debugging aid
+        return f"<Case #{self.id} {self.status} {self.title!r}>"
+
+
+class CaseEntry(Base):
+    """One immutable timeline entry on a case.
+
+    ``kind`` distinguishes entry origin: ``note`` (free-form),
+    ``alert`` (a detector hit attached by id), ``status`` (lifecycle
+    change such as closed/reopened) and ``ip`` (a pinned address).
+    """
+
+    __tablename__ = "case_entries"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    case_id: Mapped[int] = mapped_column(
+        ForeignKey("cases.id", ondelete="CASCADE"), index=True
+    )
+    ts: Mapped[dt.datetime] = mapped_column(DateTime, default=utcnow)
+    kind: Mapped[str] = mapped_column(String(16), default="note")
+    author: Mapped[str] = mapped_column(String(64), default="system")
+    body: Mapped[str] = mapped_column(Text, default="")
+    alert_id: Mapped[int | None] = mapped_column(
+        ForeignKey("alerts.id", ondelete="SET NULL"), nullable=True
+    )
+    ip: Mapped[str | None] = mapped_column(String(64))
+
+    case: Mapped[Case] = relationship(back_populates="entries")
+
+    def __repr__(self) -> str:  # pragma: no cover - debugging aid
+        return f"<CaseEntry case={self.case_id} {self.kind}>"
+
+
 class ApiToken(Base):
     """Bearer token for machine access to the REST API.
 

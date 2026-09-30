@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Case #{{ case_id }} · Watchtail{% endblock %}
+{% block content %}
+<section class="card full">
+  <p><a href="{{ url_for('cases.index') }}">&larr; all cases</a></p>
+  <h2>#{{ case_id }} — {{ title }}
+    {% if status == 'closed' %}
+    <span class="badge dismissed">closed</span>
+    {% else %}
+    <span class="badge warn">{{ status }}</span>
+    {% endif %}
+    <span class="badge {{ 'critical' if severity == 'critical' else ('warn' if severity in ('high', 'medium') else 'ok') }}">{{ severity }}</span>
+  </h2>
+  <p class="muted small">opened by {{ created_by }} at {{ created_at }}Z{% if closed_at %} · closed at {{ closed_at }}Z{% endif %}</p>
+  {% if description %}<p>{{ description }}</p>{% endif %}
+
+  <h3>Timeline</h3>
+  <table>
+    <thead><tr><th>when (UTC)</th><th>kind</th><th>by</th><th>entry</th></tr></thead>
+    <tbody>
+      {% for item in timeline %}
+      <tr>
+        <td class="small">{{ item.ts }}Z</td>
+        <td>
+          {% if item.kind == 'alert' %}
+            <span class="badge critical">alert</span>
+          {% elif item.kind == 'status' %}
+            <span class="badge">status</span>
+          {% else %}
+            <span class="badge ok">note</span>
+          {% endif %}
+        </td>
+        <td>{{ item.author }}</td>
+        <td>
+          {{ item.body }}
+          {% if item.alert_id %}
+            <a href="{{ url_for('events.browse') }}" class="small">(alert #{{ item.alert_id }})</a>
+          {% endif %}
+          {% if item.ip %}<code>{{ item.ip }}</code>{% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="muted">No entries yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if status != 'closed' %}
+  <h3>Add note</h3>
+  <form class="filter-bar" method="post" action="{{ url_for('cases.add_note', case_id=case_id) }}">
+    <input type="text" name="body" placeholder="finding, hypothesis, evidence…" size="60" required>
+    <button type="submit">Add note</button>
+  </form>
+
+  <h3>Attach alert</h3>
+  <form class="filter-bar" method="post" action="{{ url_for('cases.attach_alert', case_id=case_id) }}">
+    <input type="number" name="alert_id" placeholder="alert id" min="1" required>
+    <button type="submit">Attach</button>
+  </form>
+
+  <form class="filter-bar" method="post" action="{{ url_for('cases.close', case_id=case_id) }}">
+    <input type="text" name="resolution" placeholder="resolution note (optional)" size="50">
+    <button type="submit">Close case</button>
+  </form>
+  {% else %}
+  <form class="filter-bar" method="post" action="{{ url_for('cases.reopen', case_id=case_id) }}">
+    <button type="submit">Reopen case</button>
+  </form>
+  {% endif %}
+</section>
+{% endblock %}

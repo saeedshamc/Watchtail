@@ -14,6 +14,7 @@ STRINGS = {
     "nav.sources": {"en": "Sources", "fa": "منابع"},
     "nav.respond": {"en": "Respond", "fa": "پاسخ"},
     "nav.suppressions": {"en": "Suppressions", "fa": "سکوت‌ها"},
+    "nav.cases": {"en": "Cases", "fa": "پرونده‌ها"},
     "nav.settings": {"en": "Settings", "fa": "تنظیمات"},
     "nav.logout": {"en": "Log out", "fa": "خروج"},
     "stats.events": {"en": "events (24h)", "fa": "رویداد (۲۴ ساعت)"},
