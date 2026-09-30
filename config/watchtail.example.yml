@@ -51,6 +51,21 @@ sources:
     path: /var/log/myapp/app.jsonl
     enabled: false
 
+  # Network listeners: instead of following a file, watchtail binds
+  # the given endpoint and receives syslog traffic directly, e.g. from
+  # rsyslog forwarding (*.* @127.0.0.1:5514) or a firewall appliance.
+  # Lines from senders without a parseable IP are attributed to the
+  # sender address.
+  - name: udp syslog receiver
+    type: syslog
+    path: udp://0.0.0.0:5514
+    enabled: false
+
+  - name: rfc5424 tcp receiver
+    type: syslog5424
+    path: tcp://0.0.0.0:5601
+    enabled: false
+
 detectors:
   # N failed SSH logins from one IP within X seconds.
   ssh_bruteforce:

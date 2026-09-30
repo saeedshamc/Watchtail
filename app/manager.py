@@ -27,7 +27,9 @@ def resync_tailing():
     """Reconcile tail workers with the current source rows.
 
     Best-effort: returns False when no manager is registered (tests,
-    tooling), so routes can simply ignore the outcome.
+    tooling), so routes can simply ignore the outcome. Endpoint
+    sources (udp://, tcp://) are reconciled through the registry parked
+    on ``manager.listeners`` when present.
     """
     manager = get_manager()
     if manager is None:
@@ -38,4 +40,7 @@ def resync_tailing():
     with session_scope() as session:
         sources = session.query(LogSource).all()
     manager.sync(sources)
+    listeners = getattr(manager, "listeners", None)
+    if listeners is not None:
+        listeners.sync(sources)
     return True

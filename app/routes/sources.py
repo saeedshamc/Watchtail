@@ -6,6 +6,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from ..auth import admin_required, login_required
 from ..database import session_scope
+from ..listener import parse_endpoint
 from ..manager import resync_tailing
 from ..models import LogSource
 from ..parsers import known_types
@@ -36,8 +37,13 @@ def add():
     if source_type not in known_types():
         flash(f"Unknown source type {source_type!r}.")
         return redirect(url_for("sources.manage"))
+    endpoint = parse_endpoint(path)
+    if endpoint is None and "://" in path:
+        flash("Endpoint sources need the form udp://host:port or tcp://host:port.")
+        return redirect(url_for("sources.manage"))
 
-    path = os.path.normpath(path)
+    if endpoint is None:
+        path = os.path.normpath(path)
     with session_scope() as session:
         existing = (
             session.query(LogSource).filter(LogSource.path == path).one_or_none()

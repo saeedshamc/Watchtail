@@ -11,6 +11,7 @@ import logging
 
 import app as watchtail_app
 from app.database import enable_sqlite_wal
+from app.listener import ListenerRegistry
 from app.manager import resync_tailing, set_manager
 from app.notifiers.digest import DigestScheduler
 from app.notifiers.webhook import build_notifiers
@@ -46,6 +47,14 @@ def build_manager(settings):
         persist_position=persist_position,
     )
     set_manager(manager)
+
+    # Endpoint sources (udp://host:port, tcp://host:port) run as
+    # network listeners instead of file tailers.
+    listeners = ListenerRegistry(
+        parser_factory=get_parser,
+        on_record=pipeline.handle_record,
+    )
+    manager.listeners = listeners
     return manager
 
 
@@ -79,6 +88,8 @@ def main():
     with session_scope() as session:
         sources = session.query(LogSource).all()
     manager.sync(sources)
+    if getattr(manager, "listeners", None) is not None:
+        manager.listeners.sync(sources)
 
     # Bind the module-level SocketIO instance to this app; without
     # this the server object does not exist and run() fails.
@@ -107,6 +118,8 @@ def main():
         )
     finally:
         digest.stop()
+        if getattr(manager, "listeners", None) is not None:
+            manager.listeners.stop_all()
         manager.stop_all()
         set_manager(None)
 
