@@ -203,13 +203,24 @@ class Pipeline:
 
 
 def prune_old_rows(settings):
-    """Delete events and alerts older than the configured retention."""
+    """Archive then delete rows older than the configured retention.
+
+    When ``retention.archive_dir`` is set, expired rows are first
+    written to a per-day gzipped NDJSON archive (events.jsonl.gz and
+    alerts.jsonl.gz under an archive date directory) so history is
+    never destroyed by the retention trim, only moved out of the hot
+    database. Archive failures do not block the delete: retention must
+    keep working even when the archive volume is full.
+    """
     max_age_days = settings.retention_max_age_days
     if not max_age_days or max_age_days <= 0:
         return
     cutoff = utcnow() - dt.timedelta(days=max_age_days)
     try:
         with session_scope() as session:
+            expired_events = session.query(Event).filter(Event.ts < cutoff).all()
+            expired_alerts = session.query(Alert).filter(Alert.ts < cutoff).all()
+            _archive_rows(settings, expired_events, expired_alerts)
             events = session.query(Event).filter(Event.ts < cutoff).delete(
                 synchronize_session=False
             )
@@ -223,3 +234,71 @@ def prune_old_rows(settings):
             )
     except Exception:
         logger.exception("retention prune failed")
+
+
+def _archive_rows(settings, events, alerts):
+    """Append expired rows to per-day NDJSON.gz archives."""
+    if not getattr(settings, "archive_dir", None):
+        return
+    if not events and not alerts:
+        return
+
+    def _event_dict(row):
+        return {
+            "id": row.id,
+            "ts": row.ts.isoformat(),
+            "source_id": row.source_id,
+            "ip": row.ip,
+            "kind": row.kind,
+            "method": row.method,
+            "path": row.path,
+            "status": row.status,
+            "bytes_sent": row.bytes_sent,
+            "user_agent": row.user_agent,
+            "raw": row.raw,
+            "meta": row.meta or {},
+        }
+
+    def _alert_dict(row):
+        return {
+            "id": row.id,
+            "ts": row.ts.isoformat(),
+            "detector": row.detector,
+            "ip": row.ip,
+            "severity": row.severity,
+            "message": row.message,
+            "meta": row.meta or {},
+        }
+
+    by_kind = {}
+    for row in events:
+        by_kind.setdefault(("events", row.ts.date()), []).append(_event_dict(row))
+    for row in alerts:
+        by_kind.setdefault(("alerts", row.ts.date()), []).append(_alert_dict(row))
+
+    import gzip
+    import json
+    import os
+
+    base_dir = settings.archive_dir
+    try:
+        os.makedirs(base_dir, exist_ok=True)
+    except OSError:
+        logger.exception("could not create archive dir %s", base_dir)
+        return
+
+    for (kind, day), rows in by_kind.items():
+        day_dir = os.path.join(base_dir, day.isoformat())
+        try:
+            os.makedirs(day_dir, exist_ok=True)
+            archive_path = os.path.join(day_dir, f"{kind}.jsonl.gz")
+            with open(archive_path, "ab") as raw:
+                with gzip.GzipFile(fileobj=raw, mode="ab") as archive:
+                    for row in rows:
+                        archive.write(json.dumps(row).encode("utf-8") + b"\n")
+            logger.info(
+                "archived %d %s rows older than retention to %s",
+                len(rows), kind, archive_path,
+            )
+        except OSError:
+            logger.exception("could not archive %s rows for %s", kind, day)

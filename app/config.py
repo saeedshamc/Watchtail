@@ -54,6 +54,7 @@ class Settings:
     geoip_mmdb: str = ""
     playbooks: list = field(default_factory=list)
     retention_max_age_days: int = 14
+    archive_dir: str = ""
     rate_limit: dict = field(default_factory=dict)
     config_dir: str = "."
     config_path: str = ""
@@ -151,6 +152,7 @@ def load_config(config_path: Optional[str] = None) -> Settings:
 
     retention = raw.get("retention") or {}
     settings.retention_max_age_days = int(retention.get("max_age_days", 14))
+    settings.archive_dir = str(retention.get("archive_dir") or "")
 
     rl = raw.get("rate_limit") or {}
     settings.rate_limit = {

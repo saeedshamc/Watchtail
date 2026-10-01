@@ -192,6 +192,11 @@ notifier:
 retention:
   # Trim events and alerts older than this many days on startup.
   max_age_days: 14
+  # Optional: before rows are deleted, append them to per-day NDJSON
+  # archives here (events.jsonl.gz / alerts.jsonl.gz per date folder)
+  # so history survives the retention trim.
+  archive_dir: ""
+  # archive_dir: /var/lib/watchtail/archive
 
 # Global request rate limiting for the web UI and API. Requests are
 # counted per client IP in a sliding window; /health and /metrics are
