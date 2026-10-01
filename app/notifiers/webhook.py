@@ -38,7 +38,9 @@ def build_notifiers(settings):
     minimum severity from the config's ``min_severity`` key.
     """
     from .base import NotifierRegistry
+    from .discord import DiscordNotifier
     from .email import EmailNotifier
+    from .slack import SlackNotifier
     from .telegram import TelegramNotifier
 
     notifiers = []
@@ -83,5 +85,22 @@ def build_notifiers(settings):
             notifiers.append(notifier)
         except ValueError:
             pass
+
+    for channel, cls, field_name in (
+        ("slack", SlackNotifier, "slack_config"),
+        ("discord", DiscordNotifier, "discord_config"),
+    ):
+        config = getattr(settings, field_name, None) or {}
+        if config.get("webhook_url"):
+            try:
+                notifier = cls(
+                    config["webhook_url"],
+                    timeout_seconds=float(config.get("timeout_seconds", 8.0)),
+                )
+                notifier.min_severity = config.get("min_severity", "low")
+                notifier.digest_enabled = bool(config.get("digest", False))
+                notifiers.append(notifier)
+            except ValueError:
+                pass
 
     return NotifierRegistry(notifiers)

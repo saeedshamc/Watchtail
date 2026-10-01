@@ -47,6 +47,8 @@ class Settings:
     webhook_min_severity: str = "low"
     email_config: dict = field(default_factory=dict)
     telegram_config: dict = field(default_factory=dict)
+    slack_config: dict = field(default_factory=dict)
+    discord_config: dict = field(default_factory=dict)
     digest_hour_utc: int = 7
     threatintel: dict = field(default_factory=dict)
     geoip_mmdb: str = ""
@@ -130,6 +132,22 @@ def load_config(config_path: Optional[str] = None) -> Settings:
     }
     settings.email_config["digest"] = bool(email.get("digest", False))
     settings.digest_hour_utc = int(notifier.get("digest_hour_utc", 7))
+
+    slack = notifier.get("slack") or {}
+    settings.slack_config = {
+        "webhook_url": str(slack.get("webhook_url") or ""),
+        "timeout_seconds": float(slack.get("timeout_seconds", 8.0)),
+        "min_severity": str(slack.get("min_severity", "low")),
+        "digest": bool(slack.get("digest", False)),
+    }
+
+    discord = notifier.get("discord") or {}
+    settings.discord_config = {
+        "webhook_url": str(discord.get("webhook_url") or ""),
+        "timeout_seconds": float(discord.get("timeout_seconds", 8.0)),
+        "min_severity": str(discord.get("min_severity", "low")),
+        "digest": bool(discord.get("digest", False)),
+    }
 
     retention = raw.get("retention") or {}
     settings.retention_max_age_days = int(retention.get("max_age_days", 14))

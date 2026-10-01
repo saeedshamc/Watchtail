@@ -170,6 +170,21 @@ notifier:
     chat_id: ""
     min_severity: medium
 
+  # Slack: create an incoming webhook at
+  # https://<workspace>.slack.com/apps/manage/custom-integrations and
+  # paste its URL here. The colour bar mirrors alert severity.
+  slack:
+    webhook_url: ""
+    timeout_seconds: 8
+    min_severity: low
+
+  # Discord: server settings -> Integrations -> Webhooks -> new webhook,
+  # copy the URL. Alerts arrive as colour-coded embeds.
+  discord:
+    webhook_url: ""
+    timeout_seconds: 8
+    min_severity: low
+
   # Daily digest: set digest: true on a channel (email and/or telegram)
   # to receive one 24h summary per day at this UTC hour.
   digest_hour_utc: 7
