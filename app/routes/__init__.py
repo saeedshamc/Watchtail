@@ -13,6 +13,7 @@ def register_blueprints(app):
     from .ip_detail import bp as ip_detail_bp
     from .locale import bp as locale_bp
     from .metrics import bp as metrics_bp
+    from .reports import bp as reports_bp
     from .respond import bp as respond_bp
     from .reviews import bp as reviews_bp
     from .settings import bp as settings_bp
@@ -34,4 +35,5 @@ def register_blueprints(app):
     app.register_blueprint(api_v1_bp)
     app.register_blueprint(ingest_bp)
     app.register_blueprint(metrics_bp)
+    app.register_blueprint(reports_bp)
     app.register_blueprint(locale_bp)

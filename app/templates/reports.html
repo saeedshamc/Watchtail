@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Reports · Watchtail{% endblock %}
+{% block content %}
+<section class="card full">
+  <h2>Reports
+    <span class="muted small">daily trends, UTC days</span>
+  </h2>
+
+  <p class="filter-bar">
+    {% for choice in (7, 14, 30) %}
+    <a href="{{ url_for('reports.reports', days=choice) }}"
+       {% if days == choice %}class="badge ok"{% endif %}>last {{ choice }} days</a>
+    {% endfor %}
+  </p>
+
+  <h3>Alerts per detector</h3>
+  <table>
+    <thead>
+      <tr><th>detector</th><th>total</th><th>worst ip</th><th>daily trend</th></tr>
+    </thead>
+    <tbody>
+      {% for item in detector_trends %}
+      <tr>
+        <td><span class="badge reviewed">{{ item.detector }}</span></td>
+        <td class="num">{{ item.total }}</td>
+        <td>{% if item.top_ip %}<code>{{ item.top_ip }}</code>{% else %}<span class="muted">—</span>{% endif %}</td>
+        <td class="small">{{ item.series | join(' · ') }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="muted">No alerts in this window.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:1.4rem">Events per source</h3>
+  <table>
+    <thead>
+      <tr><th>source</th><th>total</th><th>4xx share</th><th>daily trend</th></tr>
+    </thead>
+    <tbody>
+      {% for item in source_trends %}
+      <tr>
+        <td>
+          {% if item.source %}
+          <span class="badge ok">{{ item.source.type }}</span> {{ item.source.name }}
+          {% else %}
+          <span class="badge">unattributed</span>
+          {% endif %}
+        </td>
+        <td class="num">{{ item.total }}</td>
+        <td class="num">{{ item.error_pct }}%</td>
+        <td class="small">{{ item.series | join(' · ') }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="muted">No events in this window.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
