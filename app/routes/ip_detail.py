@@ -49,6 +49,10 @@ def detail(ip):
         if geoip.available():
             geo = geoip.lookup(ip)
 
+    from .. import rdns
+
+    hostname = rdns.lookup(ip)
+
     return render_template(
         "ip_detail.html",
         ip=ip,
@@ -61,6 +65,7 @@ def detail(ip):
             "operator_note": operator_note,
             "tags": tags,
             "geo": geo,
+            "hostname": hostname,
         },
         alerts=alerts,
         events=events,

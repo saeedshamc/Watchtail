@@ -9,6 +9,8 @@
   <p class="muted small">
     {{ ip_row.alert_count }} alert(s) · first seen {{ ip_row.first_seen_at.strftime('%Y-%m-%d %H:%M UTC') if ip_row.first_seen_at else '?' }}
     · last alert {{ ip_row.last_alert_at.strftime('%Y-%m-%d %H:%M UTC') if ip_row.last_alert_at else 'never' }}
+    {% if ip_row.hostname %} · PTR {{ ip_row.hostname }}{% endif %}
+    {% if ip_row.geo %} · {{ ip_row.geo.country_name or ip_row.geo.country_code }}{% endif %}
   </p>
   <form method="post" action="{{ url_for('reviews.update_status', ip=ip) }}" class="inline-actions">
     <input type="hidden" name="action" value="reviewed">
