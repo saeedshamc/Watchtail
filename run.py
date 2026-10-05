@@ -13,6 +13,7 @@ import app as watchtail_app
 from app.database import enable_sqlite_wal
 from app.listener import ListenerRegistry
 from app.manager import resync_tailing, set_manager
+from app.ssh_tail import SshTailRegistry
 from app.notifiers.digest import DigestScheduler
 from app.notifiers.webhook import build_notifiers
 from app.parsers import get_parser
@@ -55,6 +56,13 @@ def build_manager(settings):
         on_record=pipeline.handle_record,
     )
     manager.listeners = listeners
+
+    # ssh://user@host/path sources stream remote files over SSH.
+    ssh_tails = SshTailRegistry(
+        parser_factory=get_parser,
+        on_record=pipeline.handle_record,
+    )
+    manager.ssh_tails = ssh_tails
     return manager
 
 
@@ -90,6 +98,8 @@ def main():
     manager.sync(sources)
     if getattr(manager, "listeners", None) is not None:
         manager.listeners.sync(sources)
+    if getattr(manager, "ssh_tails", None) is not None:
+        manager.ssh_tails.sync(sources)
 
     # Bind the module-level SocketIO instance to this app; without
     # this the server object does not exist and run() fails.
@@ -120,6 +130,8 @@ def main():
         digest.stop()
         if getattr(manager, "listeners", None) is not None:
             manager.listeners.stop_all()
+        if getattr(manager, "ssh_tails", None) is not None:
+            manager.ssh_tails.stop_all()
         manager.stop_all()
         set_manager(None)
 

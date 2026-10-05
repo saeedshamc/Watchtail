@@ -8,6 +8,7 @@ from ..auth import admin_required, login_required
 from ..database import session_scope
 from ..listener import parse_endpoint
 from ..manager import resync_tailing
+from ..ssh_tail import parse_ssh_target
 from ..models import LogSource
 from ..parsers import known_types
 
@@ -38,11 +39,15 @@ def add():
         flash(f"Unknown source type {source_type!r}.")
         return redirect(url_for("sources.manage"))
     endpoint = parse_endpoint(path)
-    if endpoint is None and "://" in path:
-        flash("Endpoint sources need the form udp://host:port or tcp://host:port.")
+    ssh_target = parse_ssh_target(path)
+    if endpoint is None and ssh_target is None and "://" in path:
+        flash(
+            "Network sources need udp://host:port, tcp://host:port "
+            "or ssh://user@host/path."
+        )
         return redirect(url_for("sources.manage"))
 
-    if endpoint is None:
+    if endpoint is None and ssh_target is None:
         path = os.path.normpath(path)
     with session_scope() as session:
         existing = (

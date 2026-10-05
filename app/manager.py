@@ -43,4 +43,7 @@ def resync_tailing():
     listeners = getattr(manager, "listeners", None)
     if listeners is not None:
         listeners.sync(sources)
+    ssh_tails = getattr(manager, "ssh_tails", None)
+    if ssh_tails is not None:
+        ssh_tails.sync(sources)
     return True

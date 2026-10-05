@@ -66,6 +66,14 @@ sources:
     path: tcp://0.0.0.0:5601
     enabled: false
 
+  # Remote tail over SSH: the given file is streamed with
+  # `tail -F` through an ssh exec channel (keys from your agent or
+  # ~/.ssh; add the watchtail user to the remote host first).
+  - name: remote auth log over ssh
+    type: auth
+    path: ssh://ops@10.0.0.12/var/log/auth.log
+    enabled: false
+
 detectors:
   # N failed SSH logins from one IP within X seconds.
   ssh_bruteforce:
