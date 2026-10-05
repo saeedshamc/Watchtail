@@ -193,3 +193,11 @@ def mint_token():
         token=plain,  # shown exactly once
         can_write=row.can_write,
     ), 201
+
+
+@bp.get("/openapi.json")
+def openapi_json():
+    """Machine-readable API description (no auth: spec only, no data)."""
+    from ..openapi import API_SPEC
+
+    return jsonify(API_SPEC)

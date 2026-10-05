@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}API docs · Watchtail{% endblock %}
+{% block content %}
+<section class="card full">
+  <h2>REST API
+    <span class="muted small">bearer token or dashboard session ·
+      <a href="{{ url_for('docs.openapi_raw') }}">openapi.json</a>
+    </span>
+  </h2>
+  <p class="muted small">{{ spec.info.description }}</p>
+
+  <table>
+    <thead><tr><th>method</th><th>path</th><th>summary</th><th>responses</th></tr></thead>
+    <tbody>
+      {% for endpoint in endpoints %}
+      <tr>
+        <td><span class="badge {{ 'critical' if endpoint.method == 'POST' else 'ok' }}">{{ endpoint.method }}</span></td>
+        <td><code>{{ endpoint.path }}</code></td>
+        <td>
+          {{ endpoint.summary }}
+          {% if endpoint.write %}<span class="badge warn">write token</span>{% endif %}
+          {% for parameter in endpoint.parameters %}
+            {% if parameter.in == 'query' %}
+              <span class="small muted">?{{ parameter.name }}</span>
+            {% endif %}
+          {% endfor %}
+        </td>
+        <td class="small">{{ endpoint.responses | join(', ') }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="4" class="muted">No endpoints.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h3 style="margin-top:1.4rem">Authentication</h3>
+  <p class="small">
+    Create a token on the tokens page, then send it as
+    <code>Authorization: Bearer &lt;token&gt;</code>. Endpoints marked
+    <span class="badge warn">write token</span> additionally need a
+    token created with <code>can_write</code>.
+  </p>
+</section>
+{% endblock %}

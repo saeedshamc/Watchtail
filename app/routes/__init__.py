@@ -7,6 +7,7 @@ def register_blueprints(app):
     from .auth import bp as auth_bp
     from .cases import bp as cases_bp
     from .dashboard import bp as dashboard_bp
+    from .docs import bp as docs_bp
     from .events import bp as events_bp
     from .health import bp as health_bp
     from .ingest import bp as ingest_bp
@@ -21,6 +22,7 @@ def register_blueprints(app):
     from .sources import bp as sources_bp
 
     app.register_blueprint(health_bp)
+    app.register_blueprint(docs_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(events_bp)
