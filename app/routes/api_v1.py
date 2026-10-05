@@ -6,7 +6,7 @@ endpoints need any live token; status-changing endpoints need
 ``can_write``.
 """
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, Response, jsonify, request
 
 from ..api_auth import token_required
 from ..database import session_scope
@@ -120,6 +120,42 @@ def list_alerts():
             query = query.filter(Alert.severity == severity)
         rows = query.order_by(Alert.ts.desc(), Alert.id.desc()).limit(limit).all()
         return jsonify([_serialize_alert(row) for row in rows])
+
+
+@bp.get("/alerts/stix")
+@token_required()
+def export_stix():
+    """Recent alerts as a STIX 2.1 bundle (application/stix+json)."""
+    from ..exports import to_stix_bundle
+
+    rows = _recent_alerts()
+    response = jsonify(to_stix_bundle(rows))
+    response.mimetype = "application/stix+json; version=2.1"
+    return response
+
+
+@bp.get("/alerts/cef")
+@token_required()
+def export_cef():
+    """Recent alerts as ArcSight CEF lines (text/plain)."""
+    from ..exports import to_cef_lines
+
+    body = "\n".join(to_cef_lines(_recent_alerts()))
+    return Response(body + ("\n" if body else ""), mimetype="text/plain")
+
+
+def _recent_alerts():
+    try:
+        limit = min(int(request.args.get("limit", 100) or 100), 1000)
+    except ValueError:
+        limit = 100
+    with session_scope() as session:
+        return (
+            session.query(Alert)
+            .order_by(Alert.ts.desc(), Alert.id.desc())
+            .limit(limit)
+            .all()
+        )
 
 
 @bp.get("/stats")
