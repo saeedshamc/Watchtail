@@ -7,8 +7,8 @@
     <a href="{{ url_for('respond.index', ip=ip) }}" class="small">respond &rarr;</a>
   </h2>
   <p class="muted small">
-    {{ ip_row.alert_count }} alert(s) · first seen {{ ip_row.first_seen_at.strftime('%Y-%m-%d %H:%M UTC') if ip_row.first_seen_at else '?' }}
-    · last alert {{ ip_row.last_alert_at.strftime('%Y-%m-%d %H:%M UTC') if ip_row.last_alert_at else 'never' }}
+    {{ ip_row.alert_count }} alert(s) · first seen {{ display_ts(ip_row.first_seen_at, '%Y-%m-%d %H:%M') if ip_row.first_seen_at else '?' }}
+    · last alert {{ display_ts(ip_row.last_alert_at, '%Y-%m-%d %H:%M') if ip_row.last_alert_at else 'never' }}
     {% if ip_row.hostname %} · PTR {{ ip_row.hostname }}{% endif %}
     {% if ip_row.geo %} · {{ ip_row.geo.country_name or ip_row.geo.country_code }}{% endif %}
   </p>
@@ -53,12 +53,11 @@
 
 <section class="card full">
   <h2>Alerts</h2>
-  <table>
-    <thead><tr><th>time (UTC)</th><th>detector</th><th>severity</th><th>message</th></tr></thead>
+  <table>        <thead><tr><th data-tz-label>time ({{ current_tz_label() }})</th><th>detector</th><th>severity</th><th>message</th></tr></thead>
     <tbody>
       {% for alert in alerts %}
       <tr>
-        <td>{{ alert.ts.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        <td>{{ display_ts(alert.ts) }}</td>
         <td><span class="badge {{ alert.severity }}">{{ alert.detector }}</span></td>
         <td>{{ alert.severity }}</td>
         <td class="small">
@@ -85,7 +84,7 @@
     <tbody>
       {% for event in events %}
       <tr>
-        <td>{{ event.ts.strftime('%H:%M:%S') }}</td>
+        <td>{{ display_ts(event.ts, '%H:%M:%S') }}</td>
         <td>{{ event.kind }}</td>
         <td class="small">{{ event.method ~ ' ' ~ event.path if event.method else event.meta.get('user', '') }}</td>
         <td class="num">{{ event.status or '' }}</td>

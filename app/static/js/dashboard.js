@@ -78,7 +78,7 @@
     if (placeholder) tbody.innerHTML = "";
 
     var tr = document.createElement("tr");
-    var time = (event.ts || "").slice(11, 19) || "--:--:--";
+    var time = shiftTs(event.ts);
     var request = event.method
       ? event.method + " " + (event.path || "")
       : event.kind;
@@ -229,6 +229,27 @@
     });
   }
 
+  /* ---- display timezone (kept in sync with the session) ------------- */
+
+  var tzOffsetMinutes = 0;
+  var tzLabel = "UTC";
+
+  function shiftTs(iso) {
+    /* ISO UTC timestamp -> "HH:MM:SS" in the viewer's timezone. */
+    if (!iso) return "--:--:--";
+    var ms = Date.parse(iso.endsWith("Z") ? iso : iso + "Z");
+    if (isNaN(ms)) return "--:--:--";
+    var shifted = new Date(ms + tzOffsetMinutes * 60000);
+    return shifted.toISOString().slice(11, 19);
+  }
+
+  function applyTzLabel() {
+    var heads = document.querySelectorAll("th[data-tz-label]");
+    for (var i = 0; i < heads.length; i++) {
+      heads[i].textContent = "time (" + tzLabel + ")";
+    }
+  }
+
   function connectSocket() {
     if (typeof io === "undefined") {
       setSocketState("live updates unavailable");
@@ -261,6 +282,9 @@
 
   document.addEventListener("DOMContentLoaded", function () {
     var attrs = document.body.dataset;
+    tzOffsetMinutes = parseInt(attrs.tzOffset || "0", 10) || 0;
+    if (attrs.tzLabel) tzLabel = attrs.tzLabel;
+    applyTzLabel();
     chart = initChart(
       (attrs.chartLabels || "").split(",").filter(Boolean),
       (attrs.chartTraffic || "").split(",").filter(Boolean).map(Number),

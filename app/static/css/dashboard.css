@@ -8,6 +8,7 @@
   --high: #e35d5d;
   --medium: #e3a85d;
   --ok: #57b576;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -415,8 +416,9 @@ h2 a:hover { color: var(--accent); }
   cursor: pointer;
 }
 
-/* --- Language toggle -------------------------------------------------- */
-.lang-toggle {
+/* --- Language / theme toggles ----------------------------------------- */
+.lang-toggle,
+.theme-toggle {
   padding: 0.2rem 0.55rem;
   border: 1px solid var(--panel-edge);
   border-radius: 6px;
@@ -424,7 +426,23 @@ h2 a:hover { color: var(--accent); }
   font-size: 0.78rem;
   text-decoration: none;
 }
-.lang-toggle:hover { color: var(--text); border-color: var(--muted); }
+.lang-toggle:hover,
+.theme-toggle:hover { color: var(--text); border-color: var(--muted); }
+.theme-toggle { font-size: 0.95rem; line-height: 1.1; text-decoration: none; }
+
+/* --- Light theme ------------------------------------------------------- */
+[data-theme="light"] {
+  --bg: #f4f6f9;
+  --panel: #ffffff;
+  --panel-edge: #d7dde6;
+  --text: #232a33;
+  --muted: #5f6b7a;
+  --accent: #2a6ea6;
+  --high: #c23b3b;
+  --medium: #a06a1f;
+  --ok: #2f7d4f;
+  color-scheme: light;
+}
 
 /* --- MITRE ATT&CK labels --------------------------------------------- */
 .mitre {

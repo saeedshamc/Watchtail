@@ -54,4 +54,24 @@
     <button type="submit" class="save-button">Save settings</button>
   </form>
 </section>
+
+<section class="card full">
+  <h2>Display preferences</h2>
+  <p class="muted small">
+    The timezone affects how timestamps are shown for this browser only;
+    the dashboard keeps storing UTC. Theme and language have their own
+    toggles in the header.
+  </p>
+  <form class="filter-bar" method="post" action="{{ url_for('locale.choose_tz') }}">
+    <label class="settings-field">
+      <span>show times in</span>
+      <select name="tz">
+        {% for value, label in tz_choices() %}
+        <option value="{{ value }}" {% if value == current_tz_minutes() %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit">Apply</button>
+  </form>
+</section>
 {% endblock %}

@@ -89,11 +89,19 @@ def create_app(config_path=None, database_url=None):
     _register_rate_limiter(app)
     _register_security_headers(app)
 
-    from . import i18n
+    from . import i18n, prefs
 
     @app.context_processor
     def _inject_i18n():
-        return {"tr": i18n.tr, "current_lang": i18n.current_language}
+        return {
+            "tr": i18n.tr,
+            "current_lang": i18n.current_language,
+            "current_theme": prefs.current_theme,
+            "current_tz_minutes": prefs.current_tz_minutes,
+            "current_tz_label": prefs.tz_offset_label,
+            "tz_choices": prefs.tz_choices,
+            "display_ts": prefs.display_ts,
+        }
 
     return app
 

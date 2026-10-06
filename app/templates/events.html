@@ -37,13 +37,13 @@
   <table>
     <thead>
       <tr>
-        <th>time (UTC)</th><th>kind</th><th>ip</th><th>request</th><th class="num">status</th>
+        <th data-tz-label>time ({{ current_tz_label() }})</th><th>kind</th><th>ip</th><th>request</th><th class="num">status</th>
       </tr>
     </thead>
     <tbody>
       {% for event in events %}
       <tr>
-        <td>{{ event.ts.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        <td>{{ display_ts(event.ts) }}</td>
         <td><span class="badge {{ 'high' if event.kind == 'ssh_auth_fail' else 'ok' }}">{{ event.kind }}</span></td>
         <td><code>{% if event.ip %}<a href="{{ url_for('events.browse', ip=event.ip) }}">{{ event.ip }}</a>{% else %}-{% endif %}</code></td>
         <td class="small">{{ event.method ~ ' ' ~ event.path if event.method else event.meta.get('user', '') }}</td>

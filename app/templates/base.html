@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
   {% block head %}{% endblock %}
 </head>
-<body {% block body_attrs %}{% endblock %}>
+<body data-theme="{{ current_theme() }}" {% block body_attrs %}{% endblock %}>
   <header>
     <h1>watch<span>tail</span></h1>
     <nav>
@@ -23,6 +23,9 @@
     <div class="spacer"></div>
     <a href="{{ url_for('locale.switch', lang='fa' if current_lang() == 'en' else 'en') }}" class="lang-toggle">
       {{ 'فا' if current_lang() == 'en' else 'EN' }}
+    </a>
+    <a href="{{ url_for('locale.toggle_theme', theme='light' if current_theme() == 'dark' else 'dark') }}" class="theme-toggle" title="Toggle light/dark theme">
+      {{ '☾' if current_theme() == 'light' else '☀' }}
     </a>
     {% if session.get('user') %}
     <span class="muted small">{{ session['user'] }}{% if session.get('role') == 'viewer' %} (viewer){% endif %}</span>

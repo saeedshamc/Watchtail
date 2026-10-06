@@ -37,11 +37,11 @@
 <section class="card full">
   <h2>Audit trail</h2>
   <table>
-    <thead><tr><th>time (UTC)</th><th>actor</th><th>action</th><th>target</th><th>command / detail</th></tr></thead>
+    <thead><tr><th data-tz-label>time ({{ current_tz_label() }})</th><th>actor</th><th>action</th><th>target</th><th>command / detail</th></tr></thead>
     <tbody>
       {% for entry in trail %}
       <tr>
-        <td>{{ entry.ts.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+        <td>{{ display_ts(entry.ts) }}</td>
         <td>{{ entry.actor }}</td>
         <td><span class="badge {{ 'reviewed' if entry.action == 'ack' else 'ok' }}">{{ entry.action }}</span></td>
         <td><code>{{ entry.target_ip }}</code></td>

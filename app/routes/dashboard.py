@@ -5,6 +5,7 @@ import datetime as dt
 from flask import Blueprint, current_app, render_template
 from sqlalchemy import func, select
 
+from .. import prefs
 from ..auth import login_required
 from ..database import session_scope
 from ..models import Alert, Event, IpStatus, LogSource, utcnow
@@ -16,8 +17,12 @@ bp = Blueprint("dashboard", __name__)
 CHART_MINUTES = 60
 
 
-def _chart_series(session):
-    """Bucket the last hour of events into per-minute request/4xx counts."""
+def _chart_series(session, tz_minutes=0):
+    """Bucket the last hour of events into per-minute request/4xx counts.
+
+    Labels are shifted into the viewer's display timezone so the chart
+    axis matches the timestamp columns rendered by ``display_ts``.
+    """
     since = utcnow() - dt.timedelta(minutes=CHART_MINUTES)
     rows = session.execute(
         select(Event.ts, Event.status).where(Event.ts >= since)
@@ -36,7 +41,9 @@ def _chart_series(session):
     for offset in range(CHART_MINUTES - 1, -1, -1):
         minute = now_minute - dt.timedelta(minutes=offset)
         counts = buckets.get(minute, [0, 0])
-        labels.append(minute.strftime("%H:%M"))
+        labels.append(
+            (minute + dt.timedelta(minutes=tz_minutes)).strftime("%H:%M")
+        )
         traffic.append(counts[0])
         errors.append(counts[1])
     return labels, traffic, errors
@@ -68,7 +75,7 @@ def dashboard():
         )
         flagged_ips = active_flagged_ips(session, settings, limit=20)
         risky_ips = top_risky_ips(session, limit=10)
-        labels, traffic, errors = _chart_series(session)
+        labels, traffic, errors = _chart_series(session, prefs.current_tz_minutes())
 
     stats = {
         "event_count": event_count or 0,

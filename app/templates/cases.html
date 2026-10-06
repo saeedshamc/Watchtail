@@ -13,7 +13,7 @@
   </p>
 
   <table>
-    <thead><tr><th>#</th><th>title</th><th>severity</th><th>status</th><th>entries</th><th>by</th><th>updated (UTC)</th></tr></thead>
+    <thead><tr><th>#</th><th>title</th><th>severity</th><th>status</th><th>entries</th><th>by</th><th data-tz-label>updated ({{ current_tz_label() }})</th></tr></thead>
     <tbody>
       {% for case, entry_count in cases %}
       <tr>
@@ -29,7 +29,7 @@
         </td>
         <td class="num">{{ entry_count }}</td>
         <td>{{ case.created_by }}</td>
-        <td>{{ case.updated_at }}Z</td>
+        <td>{{ display_ts(case.updated_at) }}</td>
       </tr>
       {% else %}
       <tr><td colspan="7" class="muted">No cases with this filter yet.</td></tr>

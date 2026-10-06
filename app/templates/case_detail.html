@@ -11,16 +11,16 @@
     {% endif %}
     <span class="badge {{ 'critical' if severity == 'critical' else ('warn' if severity in ('high', 'medium') else 'ok') }}">{{ severity }}</span>
   </h2>
-  <p class="muted small">opened by {{ created_by }} at {{ created_at }}Z{% if closed_at %} · closed at {{ closed_at }}Z{% endif %}</p>
+  <p class="muted small">opened by {{ created_by }} at {{ display_ts(created_at) }}{% if closed_at %} · closed at {{ display_ts(closed_at) }}{% endif %}</p>
   {% if description %}<p>{{ description }}</p>{% endif %}
 
   <h3>Timeline</h3>
   <table>
-    <thead><tr><th>when (UTC)</th><th>kind</th><th>by</th><th>entry</th></tr></thead>
+    <thead><tr><th data-tz-label>when ({{ current_tz_label() }})</th><th>kind</th><th>by</th><th>entry</th></tr></thead>
     <tbody>
       {% for item in timeline %}
       <tr>
-        <td class="small">{{ item.ts }}Z</td>
+        <td class="small">{{ display_ts(item.ts) }}</td>
         <td>
           {% if item.kind == 'alert' %}
             <span class="badge critical">alert</span>
