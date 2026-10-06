@@ -38,7 +38,34 @@ config, run one command, open a browser.
 - **Integrations**: Prometheus `/metrics`, a token-authenticated REST
   API and an inbound webhook so other tools can feed alerts in;
   winlogbeat JSON brings Windows hosts under the same detectors
-- **Bilingual UI** — English and Persian (فارسی) with one click
+- **Bilingual UI** — English and Persian (فارسی) with one click, plus
+  per-browser **dark/light theme** and **timezone display** preferences
+  (the dashboard keeps storing UTC)
+- **Global rate limiting** on every dashboard and API route with
+  `Retry-After` backpressure (health, metrics and static assets exempt)
+- **Custom detectors in YAML** — exact/contains/regex field conditions
+  with threshold, window and cooldown, no Python required
+- **Syslog ingestion over UDP and TCP** (`udp://0.0.0.0:514`,
+  `tcp://...`) so network devices join file-based sources
+- **SSH remote tail** — follow logs on remote hosts over SSH
+  (`ssh://user@host/var/log/auth.log`) with the same parsers
+- **Incident cases** — group related alerts, pin IPs, keep a notes
+  timeline, close and reopen investigations
+- **Reports page** — daily per-detector and per-source trends over
+  7/14/30-day windows
+- **Slack and Discord notifications** alongside webhook, email and
+  Telegram, with per-channel severity routing and a daily digest
+- **Reverse DNS (PTR) enrichment** for flagged IPs and time-proximity
+  **alert clustering** per address
+- **OpenAPI 3.1 spec** for the REST API with a built-in docs page at
+  `/docs`
+- **STIX 2.1 and CEF alert exports** for feeding SIEMs
+- **Backup/restore CLI** — gzipped JSON archives of every table
+- **Auto-archive before prune** — expired rows land in per-day
+  NDJSON.gz files before retention trims the hot database
+- **Demo data generator** — `python -m app.cli demo-data` fills a
+  fresh install with a realistic attack story for screenshots and
+  load checks
 - **Threat intel**: local blocklists (FireHOL netsets, AbuseIPDB CSV)
   flag known-bad addresses as critical on first sight; optional
   offline GeoIP country enrichment
@@ -53,8 +80,6 @@ config, run one command, open a browser.
   graphs, event table updating over Socket.IO
 - **Flagged IPs** with one-click review or dismissal, operator notes
   and tags for tracking investigations
-- **Webhook alerts** through a pluggable notifier interface
-- **Single admin login**, PBKDF2-hashed password, session-based
 - **SQLite storage** via SQLAlchemy, swappable for PostgreSQL through a
   single config line
 
@@ -91,10 +116,19 @@ Open `http://127.0.0.1:5555` and log in. If you skip
 `WATCHTAIL_ADMIN_PASSWORD`, a random password is generated and printed
 once at startup.
 
-Prefer containers? `docker compose up -d` gives you the same dashboard
-with persistent storage — see [docs/INSTALL.md](docs/INSTALL.md) for
-the Docker section. Lost the admin password? Reset it with
-`python -m app.cli passwd`.
+Want to see the dashboard with data before pointing it at real logs?
+Seed a deterministic demo story (brute-force campaign, path scan, 4xx
+spike, one open case) with:
+
+```bash
+python -m app.cli demo-data            # add --hours N / --seed N / --no-case to taste
+```
+
+Demo addresses come from RFC 5737 documentation ranges, so they can
+never collide with real hosts. Prefer containers? `docker compose up -d`
+gives you the same dashboard with persistent storage — see
+[docs/INSTALL.md](docs/INSTALL.md) for the Docker section. Lost the
+admin password? Reset it with `python -m app.cli passwd`.
 
 ### Running the tests
 
@@ -184,7 +218,8 @@ startup.
 ```
 app/
   __init__.py      app factory, security headers, admin bootstrap
-  cli.py           `python -m app.cli passwd` admin CLI
+  cli.py           `python -m app.cli` admin CLI (passwd, user-add,
+                   backup, restore, demo-data)
   config.py        YAML settings loader (WATCHTAIL_CONFIG aware)
   database.py      engine/session management
   models.py        LogSource, Event, Alert, IpStatus, AdminUser
@@ -207,6 +242,11 @@ app/
   response.py      firewall command suggestions + audit trail
   tokens.py        hashed API token lifecycle
   geoip.py         optional offline country enrichment
+  prefs.py         per-browser theme + timezone display prefs
+  backup.py        gzipped JSON backup archives
+  exports.py       STIX 2.1 / CEF alert exports
+  openapi.py       REST API OpenAPI 3.1 spec
+  demo_data.py     deterministic demo dataset for the demo-data CLI
   templates/       Jinja2 templates
   static/          CSS, JS and vendored vendor bundles
 config/            example watchtail.yml
