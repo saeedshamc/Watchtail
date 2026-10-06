@@ -5,13 +5,16 @@
     python -m app.cli user-add viewer1 --role viewer
     python -m app.cli backup data/watchtail-backup.json.gz
     python -m app.cli restore data/watchtail-backup.json.gz --yes
+    python -m app.cli demo-data --hours 24 --seed 7
 
 ``passwd`` prompts for the new password twice without echoing; when
 ``--password`` is given it is used directly (handy for provisioning
 scripts). ``user-add`` creates additional accounts — admins may change
 state, viewers read only. ``backup`` writes a gzipped JSON archive of
 every table; ``restore`` replaces the current database contents with
-an archive (it asks for confirmation unless --yes is given). Database
+an archive (it asks for confirmation unless --yes is given).
+``demo-data`` seeds a realistic demo dataset (events, alerts, flagged
+IPs, one investigation case) into the configured database. Database
 URL resolution matches the server.
 """
 
@@ -150,6 +153,15 @@ def restore(config_path=None, archive_path="", assume_yes=False):
     return 0
 
 
+def demo_data(config_path=None, hours=24, seed=1337, no_case=False):
+    """Seed a deterministic demo dataset (see app.demo_data)."""
+    from .demo_data import run_demo_data
+
+    return run_demo_data(
+        config_path=config_path, hours=hours, seed=seed, no_case=no_case,
+    )
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         prog="python -m app.cli", description="Watchtail administration CLI"
@@ -179,6 +191,23 @@ def main(argv=None):
         help="skip the confirmation prompt (for scripts)",
     )
 
+    demo_cmd = sub.add_parser(
+        "demo-data",
+        help="seed a realistic demo dataset into the database",
+    )
+    demo_cmd.add_argument(
+        "--hours", type=int, default=24,
+        help="time window the demo traffic spans (default: 24)",
+    )
+    demo_cmd.add_argument(
+        "--seed", type=int, default=1337,
+        help="RNG seed; same seed yields the same story (default: 1337)",
+    )
+    demo_cmd.add_argument(
+        "--no-case", action="store_true",
+        help="skip creating the demo investigation case",
+    )
+
     args = parser.parse_args(argv)
     if args.command == "passwd":
         return set_password(args.config, username=args.username, password=args.password)
@@ -191,6 +220,11 @@ def main(argv=None):
         return backup(args.config, output_path=args.output)
     if args.command == "restore":
         return restore(args.config, archive_path=args.archive, assume_yes=args.yes)
+    if args.command == "demo-data":
+        return demo_data(
+            args.config, hours=args.hours, seed=args.seed,
+            no_case=args.no_case,
+        )
     parser.error(f"unknown command {args.command!r}")
 
 
